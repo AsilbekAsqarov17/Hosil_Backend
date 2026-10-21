@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 812" width="375" height="812" style="background:#F8F9FA; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <!-- Status Bar -->
+  <rect width="375" height="44" fill="#FFFFFF"/>
+  <text x="24" y="28" font-size="14" font-weight="600" fill="#1A1C1E">09:41</text>
+  <circle cx="310" cy="24" r="3" fill="#1A1C1E"/>
+  <rect x="320" y="19" width="16" height="10" rx="2" fill="none" stroke="#1A1C1E" stroke-width="1.5"/>
+  <rect x="322" y="21" width="10" height="6" rx="1" fill="#1A1C1E"/>
+
+  <!-- App Header -->
+  <rect y="44" width="375" height="60" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="20" y="72" font-size="13" font-weight="500" fill="#64748B">Hosil Bozor • Marketplace</text>
+  <text x="20" y="92" font-size="18" font-weight="700" fill="#1E3A1E">Qishloq Xoʻjaligi Bozori</text>
+  <circle cx="340" cy="74" r="16" fill="#F1F5F9"/>
+  <path d="M334 78 C334 72 346 72 346 78 M340 68 C342.2 68 344 69.8 344 72 C344 74.2 342.2 76 340 76 C337.8 76 336 74.2 336 72 C336 69.8 337.8 68 340 68 Z" stroke="#334155" stroke-width="1.5" fill="none"/>
+
+  <!-- Search Bar -->
+  <rect x="16" y="116" width="343" height="44" rx="10" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>
+  <circle cx="36" cy="138" r="6" fill="none" stroke="#94A3B8" stroke-width="1.5"/>
+  <line x1="40" y1="142" x2="46" y2="148" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="56" y="143" font-size="14" fill="#94A3B8">Urugʻ, oʻgʻit yoki hosil qidiring...</text>
+
+  <!-- Categories -->
+  <text x="16" y="185" font-size="15" font-weight="700" fill="#1E293B">Kategoriyalar (Categories)</text>
+  
+  <g transform="translate(16, 196)">
+    <!-- Cat 1 -->
+    <rect width="76" height="74" rx="12" fill="#EBF7ED" stroke="#C2E6C6" stroke-width="1"/>
+    <circle cx="38" cy="28" r="14" fill="#2E7D32"/>
+    <text x="38" y="32" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">H</text>
+    <text x="38" y="58" font-size="11" font-weight="600" fill="#1E3A1E" text-anchor="middle">Hosil</text>
+    <text x="38" y="68" font-size="9" fill="#475569" text-anchor="middle">(Harvest)</text>
+    
+    <!-- Cat 2 -->
+    <g transform="translate(89, 0)">
+      <rect width="76" height="74" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+      <circle cx="38" cy="28" r="14" fill="#E2E8F0"/>
+      <text x="38" y="32" font-size="12" font-weight="700" fill="#475569" text-anchor="middle">Oʻ</text>
+      <text x="38" y="58" font-size="11" font-weight="600" fill="#334155" text-anchor="middle">Oʻgʻitlar</text>
+      <text x="38" y="68" font-size="9" fill="#64748B" text-anchor="middle">(Fertilizer)</text>
+    </g>
+
+    <!-- Cat 3 -->
+    <g transform="translate(178, 0)">
+      <rect width="76" height="74" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+      <circle cx="38" cy="28" r="14" fill="#E2E8F0"/>
+      <text x="38" y="32" font-size="12" font-weight="700" fill="#475569" text-anchor="middle">U</text>
+      <text x="38" y="58" font-size="11" font-weight="600" fill="#334155" text-anchor="middle">Urugʻlar</text>
+      <text x="38" y="68" font-size="9" fill="#64748B" text-anchor="middle">(Seeds)</text>
+    </g>
+
+    <!-- Cat 4 -->
+    <g transform="translate(267, 0)">
+      <rect width="76" height="74" rx="12" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+      <circle cx="38" cy="28" r="14" fill="#E2E8F0"/>
+      <text x="38" y="32" font-size="12" font-weight="700" fill="#475569" text-anchor="middle">T</text>
+      <text x="38" y="58" font-size="11" font-weight="600" fill="#334155" text-anchor="middle">Texnika</text>
+      <text x="38" y="68" font-size="9" fill="#64748B" text-anchor="middle">(Tools)</text>
+    </g>
+  </g>
+
+  <!-- Banner -->
+  <rect x="16" y="284" width="343" height="72" rx="12" fill="#2E7D32"/>
+  <text x="32" y="312" font-size="14" font-weight="700" fill="#FFFFFF">Ulgurji Yangi Hosil Bozorida</text>
+  <text x="32" y="332" font-size="12" fill="#C2E6C6">Fermerlardan toʻgʻridan-toʻgʻri xarid qiling</text>
+  <rect x="250" y="304" width="95" height="32" rx="8" fill="#FFFFFF"/>
+  <text x="297" y="324" font-size="11" font-weight="700" fill="#2E7D32" text-anchor="middle">Oʻrganish →</text>
+
+  <!-- Recent Harvest Listings Section -->
+  <text x="16" y="380" font-size="15" font-weight="700" fill="#1E293B">Yangi Ulgurji Hosil (Wholesale Produce)</text>
+  <text x="325" y="380" font-size="12" font-weight="600" fill="#2E7D32">Barchasi</text>
+
+  <!-- Card 1 -->
+  <rect x="16" y="394" width="164" height="230" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="16" y="394" width="164" height="100" rx="12" fill="#E2E8F0"/>
+  <text x="98" y="448" font-size="11" fill="#64748B" text-anchor="middle">[Rasm / Photo]</text>
+  <rect x="24" y="402" width="60" height="20" rx="4" fill="#2E7D32"/>
+  <text x="54" y="415" font-size="9" font-weight="700" fill="#FFFFFF" text-anchor="middle">1-NAV</text>
+  <text x="24" y="512" font-size="13" font-weight="700" fill="#1E293B">Pomidor (Pink P.)</text>
+  <text x="24" y="528" font-size="11" fill="#64748B">Tayloq, Samarqand</text>
+  <text x="24" y="548" font-size="14" font-weight="800" fill="#2E7D32">6,500 soʻm<tspan font-size="10" font-weight="400" fill="#64748B">/kg</tspan></text>
+  <rect x="24" y="558" width="148" height="20" rx="4" fill="#F1F5F9"/>
+  <text x="28" y="572" font-size="9" font-weight="600" fill="#475569">MOQ: 100 kg • Qoldiq: 2.0 t</text>
+  <rect x="24" y="586" width="148" height="28" rx="6" fill="#2E7D32"/>
+  <text x="98" y="604" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Buyurtma / RFQ</text>
+
+  <!-- Card 2 -->
+  <rect x="195" y="394" width="164" height="230" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="195" y="394" width="164" height="100" rx="12" fill="#E2E8F0"/>
+  <text x="277" y="448" font-size="11" fill="#64748B" text-anchor="middle">[Rasm / Photo]</text>
+  <rect x="203" y="402" width="60" height="20" rx="4" fill="#0284C7"/>
+  <text x="233" y="415" font-size="9" font-weight="700" fill="#FFFFFF" text-anchor="middle">SARXIL</text>
+  <text x="203" y="512" font-size="13" font-weight="700" fill="#1E293B">Piyoz (Zarafshon)</text>
+  <text x="203" y="528" font-size="11" fill="#64748B">Yangiyoʻl, Toshkent</text>
+  <text x="203" y="548" font-size="14" font-weight="800" fill="#2E7D32">2,800 soʻm<tspan font-size="10" font-weight="400" fill="#64748B">/kg</tspan></text>
+  <rect x="203" y="558" width="148" height="20" rx="4" fill="#F1F5F9"/>
+  <text x="207" y="572" font-size="9" font-weight="600" fill="#475569">MOQ: 500 kg • Qoldiq: 10 t</text>
+  <rect x="203" y="586" width="148" height="28" rx="6" fill="#2E7D32"/>
+  <text x="277" y="604" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Buyurtma / RFQ</text>
+
+  <!-- Floating Seller Action -->
+  <rect x="16" y="638" width="343" height="42" rx="10" fill="#EBF7ED" stroke="#2E7D32" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="187" y="664" font-size="12" font-weight="700" fill="#2E7D32" text-anchor="middle">+ Fermermisiz? Hosilingizni soting</text>
+
+  <!-- Bottom Navigation Bar -->
+  <rect y="732" width="375" height="80" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  
+  <!-- Nav Item: Home -->
+  <text x="44" y="760" font-size="16" text-anchor="middle" fill="#2E7D32">🏠</text>
+  <text x="44" y="776" font-size="10" font-weight="700" fill="#2E7D32" text-anchor="middle">Asosiy</text>
+  
+  <!-- Nav Item: Catalog -->
+  <text x="116" y="760" font-size="16" text-anchor="middle" fill="#94A3B8">🔍</text>
+  <text x="116" y="776" font-size="10" font-weight="500" fill="#94A3B8" text-anchor="middle">Katalog</text>
+  
+  <!-- Nav Item: Cart -->
+  <text x="188" y="760" font-size="16" text-anchor="middle" fill="#94A3B8">🛒</text>
+  <circle cx="198" cy="750" r="6" fill="#DC2626"/>
+  <text x="198" y="753" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">1</text>
+  <text x="188" y="776" font-size="10" font-weight="500" fill="#94A3B8" text-anchor="middle">Savat</text>
+  
+  <!-- Nav Item: Orders -->
+  <text x="260" y="760" font-size="16" text-anchor="middle" fill="#94A3B8">📋</text>
+  <text x="260" y="776" font-size="10" font-weight="500" fill="#94A3B8" text-anchor="middle">Buyurtmalar</text>
+
+  <!-- Nav Item: Profile -->
+  <text x="332" y="760" font-size="16" text-anchor="middle" fill="#94A3B8">👤</text>
+  <text x="332" y="776" font-size="10" font-weight="500" fill="#94A3B8" text-anchor="middle">Profil</text>
+</svg>

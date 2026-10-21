@@ -1,0 +1,46 @@
+# Root .gitignore for Hosil Monorepo
+
+# Environment and Secrets
+.env
+.env.local
+*.pem
+*.key
+*.p12
+
+# Operating System
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editors
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.swp
+*.swo
+
+# Java & Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+.mvn/wrapper/maven-wrapper.jar
+
+# Flutter & Dart
+.dart_tool/
+.packages
+build/
+*.pub
+*.apk
+*.aab
+*.ipa
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Database Local Volumes & Logs
+pgdata/
+*.log
+logs/

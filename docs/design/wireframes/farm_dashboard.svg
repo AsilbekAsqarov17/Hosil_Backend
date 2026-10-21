@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 812" width="375" height="812" style="background:#F8F9FA; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <!-- Status Bar -->
+  <rect width="375" height="44" fill="#FFFFFF"/>
+  <text x="24" y="28" font-size="14" font-weight="600" fill="#1A1C1E">09:41</text>
+  <rect x="320" y="19" width="16" height="10" rx="2" fill="none" stroke="#1A1C1E" stroke-width="1.5"/>
+  <rect x="322" y="21" width="10" height="6" rx="1" fill="#1A1C1E"/>
+
+  <!-- Farm App Header with Farm Switcher -->
+  <rect y="44" width="375" height="64" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="20" y="68" font-size="11" font-weight="600" fill="#64748B">Hosil Farm • Kundalik Yordamchi</text>
+  <text x="20" y="90" font-size="18" font-weight="800" fill="#1E3A1E">Oltin Voha Agro ▾</text>
+  
+  <!-- Offline Sync Status Pill -->
+  <rect x="235" y="66" width="124" height="26" rx="13" fill="#FEF3C7" stroke="#FDE68A" stroke-width="1"/>
+  <circle cx="247" cy="79" r="4" fill="#D97706"/>
+  <text x="256" y="83" font-size="10" font-weight="700" fill="#92400E">Oflayn (3 kutilmoqda)</text>
+
+  <!-- Weather & Advisory Widget -->
+  <rect x="16" y="120" width="343" height="86" rx="12" fill="#EBF7ED" stroke="#C2E6C6" stroke-width="1"/>
+  <g transform="translate(32, 138)">
+    <text x="0" y="14" font-size="12" font-weight="700" fill="#1E3A1E">Tayloq, Samarqand • Bugun</text>
+    <text x="0" y="42" font-size="24" font-weight="800" fill="#2E7D32">+28°C ☀️</text>
+    <text x="110" y="40" font-size="11" fill="#475569">Namlik: 35% • Shamol: 4 m/s</text>
+    <text x="0" y="58" font-size="10" font-weight="600" fill="#166534">Tavsiya: Pomidor uchun bugun kechki sugʻorish tavsiya etiladi</text>
+  </g>
+
+  <!-- Quick Action Grid -->
+  <text x="16" y="230" font-size="14" font-weight="700" fill="#1E293B">Tezkor Amallar (Field Actions)</text>
+  
+  <g transform="translate(16, 242)">
+    <!-- Action 1: Log Activity -->
+    <rect width="106" height="76" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+    <circle cx="53" cy="26" r="14" fill="#2E7D32"/>
+    <text x="53" y="31" font-size="14" fill="#FFFFFF" text-anchor="middle">✍️</text>
+    <text x="53" y="56" font-size="11" font-weight="700" fill="#1E293B" text-anchor="middle">Faoliyat Yozish</text>
+    <text x="53" y="68" font-size="9" fill="#64748B" text-anchor="middle">(Log Activity)</text>
+
+    <!-- Action 2: Record Harvest -->
+    <g transform="translate(118, 0)">
+      <rect width="106" height="76" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+      <circle cx="53" cy="26" r="14" fill="#EBF7ED"/>
+      <text x="53" y="31" font-size="14" fill="#2E7D32" text-anchor="middle">📦</text>
+      <text x="53" y="56" font-size="11" font-weight="700" fill="#1E293B" text-anchor="middle">Hosil Kiritish</text>
+      <text x="53" y="68" font-size="9" fill="#64748B" text-anchor="middle">(Harvest Batch)</text>
+    </g>
+
+    <!-- Action 3: Add Field -->
+    <g transform="translate(236, 0)">
+      <rect width="106" height="76" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+      <circle cx="53" cy="26" r="14" fill="#F1F5F9"/>
+      <text x="53" y="31" font-size="14" fill="#475569" text-anchor="middle">🗺️</text>
+      <text x="53" y="56" font-size="11" font-weight="700" fill="#1E293B" text-anchor="middle">Maydon Qoʻshish</text>
+      <text x="53" y="68" font-size="9" fill="#64748B" text-anchor="middle">(Add Field)</text>
+    </g>
+  </g>
+
+  <!-- Active Crop Cycles Section -->
+  <text x="16" y="348" font-size="14" font-weight="700" fill="#1E293B">Faol Ekin Sikllari (Crop Cycles)</text>
+  <text x="325" y="348" font-size="12" font-weight="600" fill="#2E7D32">Barchasi</text>
+
+  <!-- Cycle Card 1 -->
+  <rect x="16" y="362" width="343" height="96" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="28" y="374" width="8" height="72" rx="4" fill="#2E7D32"/>
+  <text x="46" y="390" font-size="14" font-weight="700" fill="#1E293B">Pomidor (Pink Paradise F1)</text>
+  <text x="46" y="408" font-size="11" fill="#64748B">1-Dala Issiqxona • 1.20 ga</text>
+  <text x="46" y="428" font-size="11" fill="#475569">Ekilgan: 15-mart • Kutilayotgan hosil: 1-iyul</text>
+  <rect x="272" y="374" width="75" height="22" rx="4" fill="#EBF7ED"/>
+  <text x="309" y="389" font-size="9" font-weight="700" fill="#2E7D32" text-anchor="middle">FAOL • 85-kun</text>
+
+  <!-- Cycle Card 2 -->
+  <rect x="16" y="468" width="343" height="96" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="28" y="480" width="8" height="72" rx="4" fill="#0284C7"/>
+  <text x="46" y="496" font-size="14" font-weight="700" fill="#1E293B">Bodring (Orzu F1)</text>
+  <text x="46" y="514" font-size="11" fill="#64748B">2-Dala Ochiq yer • 2.50 ga</text>
+  <text x="46" y="534" font-size="11" fill="#475569">Ekilgan: 10-aprel • Kutilayotgan hosil: 25-may</text>
+  <rect x="272" y="480" width="75" height="22" rx="4" fill="#E0F2FE"/>
+  <text x="309" y="495" font-size="9" font-weight="700" fill="#0284C7" text-anchor="middle">FAOL • 45-kun</text>
+
+  <!-- AI Crop Scanner Teaser (Framed as Future Staged Feature) -->
+  <rect x="16" y="574" width="343" height="74" rx="10" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1"/>
+  <text x="32" y="598" font-size="12" font-weight="700" fill="#6D28D9">🔬 AI Kasallik Skaneri (Rejalashtirilgan / Prototip)</text>
+  <text x="32" y="616" font-size="10" fill="#5B21B6">Barg rasmini yuklang — sunʼiy intellekt ehtimoliy kasallikni aniqlaydi.</text>
+  <text x="32" y="632" font-size="9" font-weight="600" fill="#7C3AED">[Eslatma: AI xizmati alohida Python moduli orqali ishlaydi]</text>
+
+  <!-- Bottom Navigation Bar for Hosil Farm -->
+  <rect y="732" width="375" height="80" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  
+  <text x="38" y="760" font-size="16" text-anchor="middle" fill="#2E7D32">🚜</text>
+  <text x="38" y="776" font-size="10" font-weight="700" fill="#2E7D32" text-anchor="middle">Fermam</text>
+  
+  <text x="112" y="760" font-size="16" text-anchor="middle" fill="#94A3B8">🗺️</text>
+  <text x="112" y="776" font-size="10" font-weight="500" fill="#94A3B8" text-anchor="middle">Maydonlar</text>
+  
+  <text x="187" y="760" font-size="16" text-anchor="middle" fill="#94A3B8">📝</text>
+  <text x="187" y="776" font-size="10" font-weight="500" fill="#94A3B8" text-anchor="middle">Kundalik</text>
+  
+  <text x="262" y="760" font-size="16" text-anchor="middle" fill="#94A3B8">📦</text>
+  <text x="262" y="776" font-size="10" font-weight="500" fill="#94A3B8" text-anchor="middle">Hosil</text>
+
+  <text x="337" y="760" font-size="16" text-anchor="middle" fill="#94A3B8">⚙️</text>
+  <text x="337" y="776" font-size="10" font-weight="500" fill="#94A3B8" text-anchor="middle">Sozlama</text>
+</svg>

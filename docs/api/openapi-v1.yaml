@@ -1,0 +1,4931 @@
+openapi: 3.0.3
+info:
+  title: Hosil Platform REST API
+  description: |
+    Authoritative REST API specification for the Hosil agricultural ecosystem (Hosil Bozor, Hosil Farm, Hosil Logistika).
+    Enforces shared identity, decoupled modular monolith domains, offline-first farm synchronization, and strict data privacy boundaries.
+  version: 1.0.0
+  contact:
+    name: Hosil Core Platform Engineering
+    url: https://hosil.uz
+    email: dev@hosil.uz
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.hosil.uz/api/v1
+    description: Production Environment
+  - url: http://localhost:8080/api/v1
+    description: Local Docker / Development Environment
+
+security:
+  - BearerAuth: []
+
+paths:
+  # =========================================================================
+  # AUTHENTICATION & IDENTITY MODULE (hosil-identity)
+  # =========================================================================
+
+  /auth/otp/request:
+    post:
+      summary: Request SMS OTP challenge
+      operationId: requestOtpChallenge
+      security: []
+      description: |
+        Generates and dispatches a 6-digit OTP code to an Uzbekistan phone number via SMS.
+        Implements rate limiting (max 3 attempts per 5 minutes) and anti-enumeration generic responses.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpRequest'
+      responses:
+        '200':
+          description: OTP challenge successfully generated and dispatched.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpChallengeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '428':
+          $ref: '#/components/responses/PreconditionRequiredError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+
+  /auth/telegram/link-session:
+    post:
+      summary: Create Telegram linking session (Dev / Milestone 6C.5)
+      operationId: createTelegramLinkSession
+      security: []
+      description: |
+        Generates a 10-minute linking session and deep link for the Telegram authentication bot.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramLinkSessionRequest'
+      responses:
+        '200':
+          description: Linking session created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelegramLinkSessionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /auth/telegram/status:
+    post:
+      summary: Check Telegram linking status (Dev / Milestone 6C.5)
+      description: Validates linking status for an active session token without exposing phone numbers or account enumeration.
+      operationId: checkTelegramLinkStatus
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramLinkStatusRequest'
+      responses:
+        '200':
+          description: Telegram linking status checked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelegramLinkStatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /auth/otp/verify:
+    post:
+      summary: Verify SMS OTP and authenticate
+      operationId: verifyOtpAndAuthenticate
+      security: []
+      description: |
+        Validates the one-time passcode against the active challenge.
+        Upon success, consumes the challenge, records an active session, and returns an access/refresh token pair.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerifyRequest'
+      responses:
+        '200':
+          description: Successfully authenticated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          description: Challenge locked due to excessive failed attempts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /auth/token/refresh:
+    post:
+      summary: Refresh access token
+      operationId: refreshAccessToken
+      security: []
+      description: |
+        Exchanges a valid refresh token for a newly issued access token and rotated refresh token.
+        Revokes the previous refresh token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+      responses:
+        '200':
+          description: Token pair refreshed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/logout:
+    post:
+      summary: Explicit user session logout
+      operationId: logoutSession
+      description: Revokes the active session associated with the submitted token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '204':
+          description: Session successfully revoked.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /users/me:
+    get:
+      summary: Get current authenticated user profile
+      operationId: getCurrentUserProfile
+      description: Returns profile details, assigned roles, commercial seller verification status, and accessible farms.
+      responses:
+        '200':
+          description: User profile details retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    patch:
+      summary: Update current user profile
+      operationId: updateCurrentUserProfile
+      description: Modifies non-identity profile preferences (name, language, region, district).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
+      responses:
+        '200':
+          description: User profile successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # =========================================================================
+  # FARM MANAGEMENT MODULE (hosil-farm)
+  # =========================================================================
+
+  /farms:
+    get:
+      summary: List accessible farms
+      operationId: listAccessibleFarms
+      description: Returns a paginated list of farms where the authenticated user holds an active membership.
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+      responses:
+        '200':
+          description: Paginated farm list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFarmResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      summary: Create new farm holding
+      operationId: createFarm
+      description: Registers a new farm. The caller automatically becomes the legal owner.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFarmRequest'
+      responses:
+        '201':
+          description: Farm holding successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FarmDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /farms/{farmId}:
+    get:
+      summary: Get farm holding details
+      operationId: getFarmById
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+      responses:
+        '200':
+          description: Farm holding details retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FarmDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    patch:
+      summary: Update farm holding profile
+      operationId: updateFarmProfile
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFarmRequest'
+      responses:
+        '200':
+          description: Farm profile updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FarmDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /farms/{farmId}/members:
+    get:
+      summary: List farm members
+      operationId: listFarmMembers
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+      responses:
+        '200':
+          description: Active farm members list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FarmMemberDto'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      summary: Add or invite member to farm
+      operationId: addFarmMember
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddFarmMemberRequest'
+      responses:
+        '201':
+          description: Farm membership created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FarmMemberDto'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /farms/{farmId}/members/{membershipId}:
+    delete:
+      summary: Revoke farm membership
+      operationId: revokeFarmMembership
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+        - $ref: '#/components/parameters/MembershipIdParam'
+      responses:
+        '204':
+          description: Farm membership successfully revoked.
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /farms/{farmId}/fields:
+    get:
+      summary: List farm fields
+      operationId: listFarmFields
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+      responses:
+        '200':
+          description: Paginated field plots list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFieldResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      summary: Create field plot
+      operationId: createField
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFieldRequest'
+      responses:
+        '201':
+          description: Field plot created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /farms/{farmId}/fields/{fieldId}:
+    get:
+      summary: Get field details
+      operationId: getFieldById
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+        - $ref: '#/components/parameters/FieldIdParam'
+      responses:
+        '200':
+          description: Field plot details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    patch:
+      summary: Update field plot
+      operationId: updateField
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+        - $ref: '#/components/parameters/FieldIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFieldRequest'
+      responses:
+        '200':
+          description: Field plot updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /farms/{farmId}/crop-cycles:
+    get:
+      summary: List crop cycles
+      operationId: listCropCycles
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+        - name: fieldId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [PLANNED, ACTIVE, HARVESTED, TERMINATED]
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+      responses:
+        '200':
+          description: Paginated crop cycles.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCropCycleResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      summary: Create crop cycle
+      operationId: createCropCycle
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCropCycleRequest'
+      responses:
+        '201':
+          description: Crop cycle initialized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CropCycleDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /farms/{farmId}/crop-cycles/{cycleId}:
+    get:
+      summary: Get crop cycle details
+      operationId: getCropCycleById
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+        - $ref: '#/components/parameters/CycleIdParam'
+      responses:
+        '200':
+          description: Crop cycle details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CropCycleDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    patch:
+      summary: Update crop cycle status or harvest dates
+      operationId: updateCropCycle
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+        - $ref: '#/components/parameters/CycleIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCropCycleRequest'
+      responses:
+        '200':
+          description: Crop cycle updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CropCycleDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /farms/{farmId}/activities:
+    get:
+      summary: List farm activities
+      operationId: listFarmActivities
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+        - name: cropCycleId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: fieldId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Paginated activity logs.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedActivityResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      summary: Record daily agronomic activity
+      operationId: recordFarmActivity
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFarmActivityRequest'
+      responses:
+        '201':
+          description: Activity recorded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FarmActivityDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /farms/{farmId}/activities/batch-sync:
+    post:
+      summary: Batch synchronize queued offline activities
+      operationId: batchSyncActivities
+      description: |
+        Processes up to 50 queued offline activity mutations in a single request.
+        Provides idempotent replay detection and optimistic conflict detection.
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityBatchSyncRequest'
+      responses:
+        '200':
+          description: Batch synchronization outcomes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityBatchSyncResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /farms/{farmId}/harvest-batches:
+    get:
+      summary: List farm harvest batches
+      operationId: listFarmHarvestBatches
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+      responses:
+        '200':
+          description: Harvest batches list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedHarvestBatchResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      summary: Record physical harvest batch
+      operationId: recordHarvestBatch
+      description: |
+        Records bulk harvest yield from a crop cycle.
+        Initializes unallocatedQuantity = recordedQuantity. Does NOT publish to marketplace.
+      parameters:
+        - $ref: '#/components/parameters/FarmIdParam'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHarvestBatchRequest'
+      responses:
+        '201':
+          description: Harvest batch recorded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HarvestBatchDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /harvest-batches/{batchId}:
+    get:
+      summary: Get harvest batch details
+      operationId: getHarvestBatchById
+      parameters:
+        - $ref: '#/components/parameters/BatchIdParam'
+      responses:
+        '200':
+          description: Harvest batch details and allocation summary.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HarvestBatchDto'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # =========================================================================
+  # MARKETPLACE PUBLICATION BOUNDARY (hosil-marketplace)
+  # =========================================================================
+
+  /market/harvest-listings:
+    get:
+      summary: Search and browse published harvest listings
+      operationId: searchHarvestListings
+      description: |
+        Publicly accessible discovery endpoint for wholesale harvest listings on Hosil Bozor.
+        Returns only listings with status PUBLISHED, sorted deterministically with id tie-breaker.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/CropTypeQueryParam'
+        - $ref: '#/components/parameters/RegionQueryParam'
+        - $ref: '#/components/parameters/DistrictQueryParam'
+        - $ref: '#/components/parameters/QualityGradeQueryParam'
+        - $ref: '#/components/parameters/MinPriceQueryParam'
+        - $ref: '#/components/parameters/MaxPriceQueryParam'
+        - $ref: '#/components/parameters/IsRfqEnabledQueryParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Paginated published harvest listings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedHarvestListingResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+    post:
+      summary: Publish harvest listing to Hosil Bozor
+      operationId: publishHarvestListing
+      description: |
+        Explicit operational bridge linking private farm harvest to public marketplace.
+        Allocates stock from harvest_batch under pessimistic row-locking (SELECT ... FOR UPDATE).
+        Returns a DTO exposing strictly public commercial fields.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishHarvestListingRequest'
+      responses:
+        '201':
+          description: Harvest listing published and stock allocated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HarvestListingDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          description: Stock conflict (insufficient unallocated batch quantity).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /market/harvest-listings/{listingId}:
+    get:
+      summary: Get published harvest listing detail
+      operationId: getHarvestListingById
+      description: |
+        Publicly accessible detail endpoint. Returns commercial attributes for a single published listing.
+        Returns 404 if the listing does not exist or has a non-published status (DRAFT, PAUSED, ARCHIVED, SUSPENDED).
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ListingIdParam'
+      responses:
+        '200':
+          description: Published harvest listing details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HarvestListingDto'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /market/harvest-listings/{listingId}/inquiries:
+    post:
+      summary: Submit buyer RFQ inquiry on harvest listing
+      operationId: submitRfqInquiry
+      description: |
+        Initiates a pre-order Request-for-Quote (RFQ) negotiation for an active harvest listing.
+        Creates the inquiry and the initial proposal (Offer #1).
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ListingIdParam'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInquiryRequest'
+      responses:
+        '201':
+          description: RFQ inquiry created and initial offer proposed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /market/inquiries:
+    get:
+      summary: List user RFQ inquiries
+      operationId: listMyInquiries
+      description: |
+        Retrieves paginated RFQ inquiries where the authenticated user is either buyer or seller.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/InquiryRoleQueryParam'
+        - $ref: '#/components/parameters/InquiryStatusQueryParam'
+        - $ref: '#/components/parameters/ListingIdQueryParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Paginated inquiry summaries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedInquirySummaryResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /market/inquiries/{inquiryId}:
+    get:
+      summary: Get inquiry details and full offer history
+      operationId: getInquiryById
+      description: |
+        Retrieves complete negotiation details and chronological offer progression for an inquiry.
+        Only the participating buyer and seller are authorized to view details.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/InquiryIdParam'
+      responses:
+        '200':
+          description: Inquiry details and historical offer progression.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /market/inquiries/{inquiryId}/offers:
+    post:
+      summary: Submit counteroffer on inquiry
+      operationId: submitCounterOffer
+      description: |
+        Submits a counteroffer in response to the current active proposal.
+        Supersedes the previous proposal and transfers the response turn to the counterparty.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/InquiryIdParam'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitOfferRequest'
+      responses:
+        '201':
+          description: Counteroffer submitted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /market/inquiries/{inquiryId}/accept:
+    post:
+      summary: Accept current active offer
+      operationId: acceptOffer
+      description: |
+        Accepts the current proposal, binding the agreed commercial terms.
+        Transitions the inquiry to AGREED and the current offer to ACCEPTED.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/InquiryIdParam'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      responses:
+        '200':
+          description: Offer accepted and agreed terms bound.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /market/inquiries/{inquiryId}/reject:
+    post:
+      summary: Reject inquiry
+      operationId: rejectInquiry
+      description: |
+        Formally terminates the negotiation by rejecting the inquiry.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/InquiryIdParam'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectInquiryRequest'
+      responses:
+        '200':
+          description: Inquiry rejected.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /market/inquiries/{inquiryId}/withdraw:
+    post:
+      summary: Withdraw inquiry (Buyer only)
+      operationId: withdrawInquiry
+      description: |
+        Allows the buyer who initiated the inquiry to withdraw it before agreement.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/InquiryIdParam'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawInquiryRequest'
+      responses:
+        '200':
+          description: Inquiry withdrawn.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /market/orders/from-rfq:
+    post:
+      summary: Place wholesale order from agreed RFQ
+      operationId: createOrderFromRfq
+      description: |
+        Transforms an agreed RFQ inquiry into a formal wholesale purchase order in status AWAITING_SELLER_CONFIRMATION.
+        Atomically locks inventory and creates an inventory reservation. Enforces strict quantity conservation.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWholesaleOrderRequest'
+      responses:
+        '201':
+          description: Order created and inventory reserved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailDto'
+        '200':
+          description: Idempotent hit; returns existing order without duplicate reservation.
+          headers:
+            X-Cache-Lookup:
+              schema:
+                type: string
+                example: "IDEMPOTENT_HIT"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /market/orders:
+    get:
+      summary: List authenticated user's orders
+      operationId: listMyOrders
+      description: Lists orders where caller is buyer or seller, with role and status filtering and deterministic pagination.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderRoleQueryParam'
+        - $ref: '#/components/parameters/OrderStatusQueryParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Paginated order summaries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderSummaryResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /market/orders/{orderId}:
+    get:
+      summary: Get order details
+      operationId: getOrderDetail
+      description: Retrieves complete order details including items, active reservation, and status history.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdParam'
+      responses:
+        '200':
+          description: Order details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /market/orders/{orderId}/confirm:
+    post:
+      summary: Confirm order (Seller confirmation)
+      operationId: confirmOrder
+      description: Seller explicitly confirms the wholesale order, binding the fulfillment commitment.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdParam'
+      responses:
+        '200':
+          description: Order confirmed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /market/orders/{orderId}/reject:
+    post:
+      summary: Reject order (Seller rejection)
+      operationId: rejectOrder
+      description: Seller rejects the order before confirmation. Transitions order to CANCELLED and atomically releases inventory reservation.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdParam'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderDecisionRequest'
+      responses:
+        '200':
+          description: Order rejected and reservation released.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /market/orders/{orderId}/cancel:
+    post:
+      summary: Cancel order
+      operationId: cancelOrder
+      description: Participant cancels the order under permitted lifecycle stages (DEC-010). Releases inventory reservation.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdParam'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderDecisionRequest'
+      responses:
+        '200':
+          description: Order cancelled and reservation released.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /market/orders/{orderId}/history:
+    get:
+      summary: Get order status history
+      operationId: getOrderStatusHistory
+      description: Retrieves complete append-only audit trail of state transitions for this order.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdParam'
+      responses:
+        '200':
+          description: Chronological state transition audit trail.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderStatusHistoryDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # =========================================================================
+  # AGRICULTURAL-INPUT CATALOG & SELLER OFFERS (hosil-marketplace)
+  # =========================================================================
+
+  /market/catalog/categories:
+    get:
+      summary: List agricultural input categories
+      operationId: listCatalogCategories
+      description: Returns active agricultural input product categories along with their permitted measurement units.
+      security: []
+      responses:
+        '200':
+          description: List of active categories and allowed unit codes.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryDto'
+
+  /market/catalog/products:
+    get:
+      summary: Browse and search master catalog products
+      operationId: searchCatalogProducts
+      description: Discovers master agricultural input products filtered by category or search keyword, including price floor and active offer count.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/CatalogCategoryIdQueryParam'
+        - $ref: '#/components/parameters/CatalogSearchQueryParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Paginated collection of catalog product summaries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCatalogProductResponse'
+    post:
+      summary: Create master catalog product (Platform Administration)
+      operationId: createCatalogProduct
+      description: Registers a new master agricultural input product item in the platform catalog. Restricted to administrators.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCatalogProductRequest'
+      responses:
+        '201':
+          description: Master catalog product created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogProductDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /market/catalog/products/{productId}:
+    get:
+      summary: Get master catalog product details
+      operationId: getCatalogProductDetails
+      description: Returns complete specifications, active ingredients, instructions, and permitted measurement units for a master catalog item.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProductIdParam'
+      responses:
+        '200':
+          description: Detailed master catalog product record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogProductDetailDto'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /market/catalog/products/{productId}/offers:
+    get:
+      summary: List seller offers for a catalog product
+      operationId: listOffersForCatalogProduct
+      description: Publicly lists active commercial seller offers for the specified catalog product, ordered by unit price or proximity.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProductIdParam'
+        - $ref: '#/components/parameters/RegionQueryParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Paginated collection of public seller offers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicSellerOfferResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /market/seller/offers:
+    post:
+      summary: Create commercial seller offer
+      operationId: createSellerOffer
+      description: Publishes a commercial supply offer for an established catalog product. Restricted to verified commercial suppliers or cooperatives (DEC-004). Unit code must match category allowed units (DEC-009).
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSellerOfferRequest'
+      responses:
+        '201':
+          description: Seller offer created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SellerOfferDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+    get:
+      summary: List my seller offers
+      operationId: listMySellerOffers
+      description: Retrieves all offers created by the authenticated commercial supplier.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OfferStatusQueryParam'
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Paginated collection of seller offers owned by the caller.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSellerOfferDetailResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /market/seller/offers/{offerId}:
+    get:
+      summary: Get my seller offer details
+      operationId: getMySellerOfferDetails
+      description: Retrieves details of a specific seller offer owned by the authenticated caller.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OfferIdParam'
+      responses:
+        '200':
+          description: Detailed seller offer record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SellerOfferDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      summary: Update seller offer
+      operationId: updateSellerOffer
+      description: Modifies pricing, available inventory, minimum order quantity, or fulfillment options of an active seller offer.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OfferIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSellerOfferRequest'
+      responses:
+        '200':
+          description: Updated seller offer record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SellerOfferDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /market/seller/offers/{offerId}/deactivate:
+    post:
+      summary: Deactivate seller offer
+      operationId: deactivateSellerOffer
+      description: Immediately deactivates a seller offer, removing it from public discovery.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OfferIdParam'
+      responses:
+        '200':
+          description: Deactivated seller offer record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SellerOfferDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /market/input-orders:
+    post:
+      summary: Direct agricultural-input checkout
+      operationId: createInputOrder
+      description: Places an agricultural-input order from one or more seller offers belonging to the same verified seller, creating temporary reservations and computing server-side pricing (DEC-005).
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInputOrderRequest'
+      responses:
+        '201':
+          description: Order placed successfully with status PENDING_PAYMENT.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailDto'
+        '200':
+          description: Idempotent replay hit.
+          headers:
+            X-Cache-Lookup:
+              schema:
+                type: string
+                example: IDEMPOTENT_HIT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+    get:
+      summary: List input orders
+      operationId: listInputOrders
+      description: Lists paginated orders for the authenticated caller with optional role and status filters.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: role
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [BUYER, SELLER]
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Paginated order list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderSummaryPageEnvelope'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /market/input-orders/{orderId}:
+    get:
+      summary: Get input order details
+      operationId: getInputOrderDetail
+      description: Returns complete order detail, snapshots, line items, and reservations for authorized buyer or seller.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdParam'
+      responses:
+        '200':
+          description: Complete order detail record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /market/input-orders/{orderId}/cancel:
+    post:
+      summary: Cancel input order
+      operationId: cancelInputOrder
+      description: Cancels order in PENDING_PAYMENT status and releases temporary inventory reservations back to the seller offer (DEC-010).
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdParam'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderDecisionRequest'
+      responses:
+        '200':
+          description: Cancelled order details with released reservations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /market/input-orders/{orderId}/history:
+    get:
+      summary: Get input order status history
+      operationId: getInputOrderHistory
+      description: Returns chronological status transitions and audit log for authorized participants.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OrderIdParam'
+      responses:
+        '200':
+          description: Chronological status transitions list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderStatusHistoryDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # =========================================================================
+  # LOGISTICS MODULE (hosil-logistika)
+  # =========================================================================
+
+  /logistics/shipment-requests:
+    post:
+      summary: Create shipment request
+      operationId: createShipmentRequest
+      description: |
+        Creates a new cargo shipment request optionally linked to an eligible order or harvest batch.
+        Guards against duplicate concurrent active requests on the same order.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShipmentRequest'
+      responses:
+        '201':
+          description: Shipment request created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentRequestDetailDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+    get:
+      summary: List and discover shipment requests
+      operationId: listShipmentRequests
+      description: Returns paginated shipment requests with privacy masking for open browsing.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: originRegion
+          in: query
+          schema:
+            type: string
+        - name: destinationRegion
+          in: query
+          schema:
+            type: string
+        - name: mineOnly
+          in: query
+          schema:
+            type: boolean
+        - name: assignedToMe
+          in: query
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+      responses:
+        '200':
+          description: Paginated shipment requests.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedShipmentRequestSummaryResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /logistics/shipment-requests/{requestId}:
+    get:
+      summary: Get shipment request details
+      operationId: getShipmentRequest
+      description: |
+        Retrieves detailed shipment request data. Unmasked address and phone details
+        strictly accessible to requester, assigned carrier, or admin.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detailed shipment request view.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentRequestDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /logistics/shipment-requests/{requestId}/accept:
+    post:
+      summary: Accept shipment request
+      operationId: acceptShipmentRequest
+      description: Atomically accepts a shipment request by a verified carrier.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Shipment request accepted and assigned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentRequestDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /logistics/shipment-requests/{requestId}/status:
+    patch:
+      summary: Update shipment transit status
+      operationId: updateShipmentStatus
+      description: Forward sequential status progression (ACCEPTED -> PICKUP_ARRANGED -> PICKED_UP -> IN_TRANSIT -> DELIVERED).
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateShipmentStatusRequest'
+      responses:
+        '200':
+          description: Shipment status updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentRequestDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /logistics/shipment-requests/{requestId}/cancel:
+    post:
+      summary: Cancel shipment request
+      operationId: cancelShipmentRequest
+      description: Stage-gated cancellation permitted prior to cargo pickup.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelShipmentRequest'
+      responses:
+        '200':
+          description: Shipment request cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentRequestDetailDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /logistics/shipment-requests/{requestId}/history:
+    get:
+      summary: Get shipment status history
+      operationId: getShipmentHistory
+      description: Returns chronological audit status trail for shipment request.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Status history list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShipmentStatusHistoryDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /logistics/carrier-profile:
+    get:
+      summary: Get current user's carrier profile
+      operationId: getMyCarrierProfile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Carrier profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarrierProfileDto'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      summary: Create or update current user's carrier profile
+      operationId: upsertMyCarrierProfile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCarrierProfileRequest'
+      responses:
+        '200':
+          description: Carrier profile updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarrierProfileDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /logistics/carrier-profile/{carrierUserId}/verification:
+    patch:
+      summary: Administrative carrier verification status update
+      operationId: updateCarrierVerificationStatus
+      security:
+        - BearerAuth: []
+      description: |
+        Allows platform administrators to approve (VERIFIED), reject (REJECTED), or revert a carrier profile.
+        Carriers cannot self-verify; self-service upsert resets status to PENDING. Only carriers in VERIFIED status may accept shipment requests.
+      parameters:
+        - name: carrierUserId
+          in: path
+          required: true
+          description: UUID of the carrier user account
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCarrierVerificationRequest'
+      responses:
+        '200':
+          description: Carrier verification status successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarrierProfileDto'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+# =========================================================================
+# REUSABLE COMPONENTS & SCHEMAS
+# =========================================================================
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Enter the Bearer access token issued by /auth/otp/verify or /auth/token/refresh.
+
+  parameters:
+    FarmIdParam:
+      name: farmId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    FieldIdParam:
+      name: fieldId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CycleIdParam:
+      name: cycleId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    BatchIdParam:
+      name: batchId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    MembershipIdParam:
+      name: membershipId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    PageParam:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+    SizeParam:
+      name: size
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
+    SortParam:
+      name: sort
+      in: query
+      required: false
+      schema:
+        type: string
+        example: "createdAt,desc"
+    IdempotencyKeyHeader:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+      description: Client-generated UUIDv4 preventing duplicate execution on network retry.
+    ListingIdParam:
+      name: listingId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CropTypeQueryParam:
+      name: cropType
+      in: query
+      required: false
+      schema:
+        type: string
+        example: "Pomidor"
+    RegionQueryParam:
+      name: region
+      in: query
+      required: false
+      schema:
+        type: string
+        example: "Toshkent viloyati"
+    DistrictQueryParam:
+      name: district
+      in: query
+      required: false
+      schema:
+        type: string
+        example: "Yangiyoʻl tumani"
+    QualityGradeQueryParam:
+      name: qualityGrade
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [PREMIUM, FIRST_CLASS, SECOND_CLASS, STANDARD, INDUSTRIAL]
+        example: "FIRST_CLASS"
+    MinPriceQueryParam:
+      name: minPrice
+      in: query
+      required: false
+      schema:
+        type: number
+        minimum: 0
+        example: 5000.00
+    MaxPriceQueryParam:
+      name: maxPrice
+      in: query
+      required: false
+      schema:
+        type: number
+        minimum: 0
+        example: 8000.00
+    IsRfqEnabledQueryParam:
+      name: isRfqEnabled
+      in: query
+      required: false
+      schema:
+        type: boolean
+        example: false
+    InquiryIdParam:
+      name: inquiryId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    InquiryRoleQueryParam:
+      name: role
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [BUYER, SELLER]
+        example: "BUYER"
+    InquiryStatusQueryParam:
+      name: status
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [OPEN, AGREED, REJECTED, WITHDRAWN, EXPIRED]
+        example: "OPEN"
+    ListingIdQueryParam:
+      name: listingId
+      in: query
+      required: false
+      schema:
+        type: string
+        format: uuid
+    OrderIdParam:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    OrderRoleQueryParam:
+      name: role
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [BUYER, SELLER]
+        example: "BUYER"
+    OrderStatusQueryParam:
+      name: status
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [DRAFT, AWAITING_SELLER_CONFIRMATION, PENDING_PAYMENT, CONFIRMED, PROCESSING, READY_FOR_DISPATCH, IN_TRANSIT, COMPLETED, CANCELLED, DISPUTED]
+        example: "AWAITING_SELLER_CONFIRMATION"
+    ProductIdParam:
+      name: productId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    OfferIdParam:
+      name: offerId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CatalogCategoryIdQueryParam:
+      name: categoryId
+      in: query
+      required: false
+      schema:
+        type: string
+        format: uuid
+    CatalogSearchQueryParam:
+      name: search
+      in: query
+      required: false
+      schema:
+        type: string
+        example: "Karbamid"
+    OfferStatusQueryParam:
+      name: status
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [ACTIVE, INACTIVE, OUT_OF_STOCK]
+        example: "ACTIVE"
+
+  responses:
+    BadRequestError:
+      description: Malformed syntax or schema validation failure.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    UnauthorizedError:
+      description: Authentication token missing, expired, or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    ForbiddenError:
+      description: Caller lacks required role or farm membership permissions.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFoundError:
+      description: Resource not found or caller unauthorized to inspect existence.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    ConflictError:
+      description: Conflict with current state (e.g. concurrent modification, offer expired, turn violation).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    RateLimitError:
+      description: Request threshold exceeded.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    PreconditionRequiredError:
+      description: Precondition required (e.g. Telegram account linking required before OTP dispatch).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+
+  schemas:
+    # -----------------------------------------------------------------------
+    # Error Schemas
+    # -----------------------------------------------------------------------
+    ErrorEnvelope:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+            - correlationId
+            - timestamp
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_FAILED"
+            message:
+              type: string
+              example: "The request payload failed structural validation."
+            correlationId:
+              type: string
+              example: "req-8f4b-1234-9876"
+            timestamp:
+              type: string
+              format: date-time
+              example: "2026-10-14T09:30:00Z"
+            details:
+              type: array
+              items:
+                $ref: '#/components/schemas/ErrorDetail'
+
+    ErrorDetail:
+      type: object
+      required:
+        - field
+        - message
+      properties:
+        field:
+          type: string
+          example: "allocatedQuantity"
+        rejectedValue:
+          type: string
+          example: "5000.000"
+        message:
+          type: string
+          example: "Allocated quantity cannot exceed unallocated batch quantity (3200.000 KG)."
+
+    # -----------------------------------------------------------------------
+    # Auth & Identity Schemas
+    # -----------------------------------------------------------------------
+    OtpRequest:
+      type: object
+      required:
+        - phoneNumber
+      properties:
+        phoneNumber:
+          type: string
+          pattern: '^(\+998)[0-9]{9}$'
+          example: "+998901234567"
+
+    OtpChallengeResponse:
+      type: object
+      required:
+        - challengeId
+        - expiresInSeconds
+        - resendAfterSeconds
+      properties:
+        challengeId:
+          type: string
+          format: uuid
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        expiresInSeconds:
+          type: integer
+          example: 180
+        resendAfterSeconds:
+          type: integer
+          example: 60
+
+    TelegramLinkSessionRequest:
+      type: object
+      required:
+        - phoneNumber
+      properties:
+        phoneNumber:
+          type: string
+          pattern: '^(\+998)[0-9]{9}$'
+          example: "+998901234567"
+
+    TelegramLinkSessionResponse:
+      type: object
+      required:
+        - sessionId
+        - phoneNumber
+        - botUsername
+        - deepLink
+        - expiresInSeconds
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+          example: "b8a5fc94-71e8-4660-8451-d41a5f187a03"
+        phoneNumber:
+          type: string
+          example: "+998901234567"
+        botUsername:
+          type: string
+          example: "hosil_authentication_bot"
+        deepLink:
+          type: string
+          example: "https://t.me/hosil_authentication_bot?start=E5Gf_v4hZ3k"
+        expiresInSeconds:
+          type: integer
+          example: 600
+
+    TelegramLinkStatusRequest:
+      type: object
+      required:
+        - sessionToken
+      properties:
+        sessionToken:
+          type: string
+          description: Cryptographic opaque token issued by createTelegramLinkSession.
+          example: "4s7D_f8a9_sample_session_token_32bytes"
+
+    TelegramLinkStatusResponse:
+      type: object
+      required:
+        - isLinked
+      properties:
+        isLinked:
+          type: boolean
+          example: true
+
+    OtpVerifyRequest:
+      type: object
+      required:
+        - challengeId
+        - otpCode
+      properties:
+        challengeId:
+          type: string
+          format: uuid
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        otpCode:
+          type: string
+          pattern: '^[0-9]{6}$'
+          example: "849201"
+        deviceFingerprint:
+          type: string
+          example: "samsung-sm-a125f-uuid9876"
+        userAgent:
+          type: string
+          example: "HosilFarm/1.0.0 (Android 14; Build/UP1A)"
+
+    AuthTokenResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - tokenType
+        - expiresInSeconds
+      properties:
+        accessToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refreshToken:
+          type: string
+          example: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+        tokenType:
+          type: string
+          example: "Bearer"
+        expiresInSeconds:
+          type: integer
+          example: 900
+        isNewUser:
+          type: boolean
+          example: false
+        user:
+          $ref: '#/components/schemas/UserSummaryDto'
+
+    TokenRefreshRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          example: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+        deviceFingerprint:
+          type: string
+          example: "samsung-sm-a125f-uuid9876"
+
+    LogoutRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          example: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+
+    UserSummaryDto:
+      type: object
+      required:
+        - id
+        - phoneNumber
+        - status
+        - roles
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "e4b3c2a1-0000-4000-a000-000000000001"
+        phoneNumber:
+          type: string
+          example: "+998901234567"
+        status:
+          type: string
+          enum: [PENDING_VERIFICATION, ACTIVE, SUSPENDED, DEACTIVATED]
+          example: "ACTIVE"
+        roles:
+          type: array
+          items:
+            type: string
+          example: ["REGISTERED_USER", "FARMER"]
+
+    UserProfileDto:
+      type: object
+      required:
+        - fullName
+        - preferredLanguage
+        - region
+        - district
+      properties:
+        fullName:
+          type: string
+          example: "Rustam Karimov"
+        preferredLanguage:
+          type: string
+          enum: [uz-Latn, ru, uz-Cyrl]
+          example: "uz-Latn"
+        region:
+          type: string
+          example: "Toshkent viloyati"
+        district:
+          type: string
+          example: "Yangiyoʻl tumani"
+        avatarMediaId:
+          type: string
+          format: uuid
+          nullable: true
+          example: null
+
+    SellerProfileDto:
+      type: object
+      required:
+        - sellerType
+        - verificationStatus
+      properties:
+        sellerType:
+          type: string
+          enum: [FARMER, COMMERCIAL_SUPPLIER, COOPERATIVE]
+          example: "FARMER"
+        legalBusinessName:
+          type: string
+          nullable: true
+          example: null
+        verificationStatus:
+          type: string
+          enum: [UNVERIFIED, PENDING_REVIEW, VERIFIED, REJECTED, SUSPENDED]
+          example: "UNVERIFIED"
+        verifiedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+
+    AccessibleFarmSummaryDto:
+      type: object
+      required:
+        - farmId
+        - farmName
+        - membershipRole
+        - permissionsMask
+      properties:
+        farmId:
+          type: string
+          format: uuid
+          example: "f1a2b3c4-1111-4000-a000-000000000001"
+        farmName:
+          type: string
+          example: "Karimov Bogʻdorchilik"
+        membershipRole:
+          type: string
+          enum: [OWNER, MANAGER, AGRONOMIST, WORKER]
+          example: "OWNER"
+        permissionsMask:
+          type: string
+          example: "READ,WRITE_ACTIVITY,RECORD_HARVEST,PUBLISH_MARKET"
+
+    UserDetailDto:
+      type: object
+      required:
+        - id
+        - phoneNumber
+        - status
+        - profile
+        - roles
+        - accessibleFarms
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "e4b3c2a1-0000-4000-a000-000000000001"
+        phoneNumber:
+          type: string
+          example: "+998901234567"
+        status:
+          type: string
+          example: "ACTIVE"
+        profile:
+          $ref: '#/components/schemas/UserProfileDto'
+        roles:
+          type: array
+          items:
+            type: string
+          example: ["REGISTERED_USER", "FARMER"]
+        sellerProfile:
+          $ref: '#/components/schemas/SellerProfileDto'
+        accessibleFarms:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessibleFarmSummaryDto'
+
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 255
+          example: "Rustam B. Karimov"
+        preferredLanguage:
+          type: string
+          enum: [uz-Latn, ru, uz-Cyrl]
+          example: "uz-Latn"
+        region:
+          type: string
+          example: "Toshkent viloyati"
+        district:
+          type: string
+          example: "Yangiyoʻl tumani"
+        avatarMediaId:
+          type: string
+          format: uuid
+          nullable: true
+
+    # -----------------------------------------------------------------------
+    # Farm Core Schemas
+    # -----------------------------------------------------------------------
+    FarmDto:
+      type: object
+      required:
+        - id
+        - ownerUserId
+        - name
+        - region
+        - district
+        - legalType
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "f1a2b3c4-1111-4000-a000-000000000001"
+        ownerUserId:
+          type: string
+          format: uuid
+          example: "e4b3c2a1-0000-4000-a000-000000000001"
+        name:
+          type: string
+          example: "Oltin Voha Agro"
+        region:
+          type: string
+          example: "Samarqand viloyati"
+        district:
+          type: string
+          example: "Tayloq tumani"
+        totalAreaHa:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,2})?$'
+          example: "12.50"
+        legalType:
+          type: string
+          enum: [DEHQON, FERMER, MCHJ, TOMORQA]
+          example: "FERMER"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-10-14T09:30:00Z"
+
+    CreateFarmRequest:
+      type: object
+      required:
+        - name
+        - region
+        - district
+        - legalType
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 255
+          example: "Oltin Voha Agro"
+        region:
+          type: string
+          example: "Samarqand viloyati"
+        district:
+          type: string
+          example: "Tayloq tumani"
+        totalAreaHa:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,2})?$'
+          example: "12.50"
+        legalType:
+          type: string
+          enum: [DEHQON, FERMER, MCHJ, TOMORQA]
+          example: "FERMER"
+
+    UpdateFarmRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 255
+          example: "Oltin Voha Bogʻdorchilik"
+        totalAreaHa:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,2})?$'
+          example: "15.00"
+        legalType:
+          type: string
+          enum: [DEHQON, FERMER, MCHJ, TOMORQA]
+
+    FarmMemberDto:
+      type: object
+      required:
+        - id
+        - farmId
+        - userId
+        - role
+        - permissionsMask
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "a1a2b3c4-5555-4000-a000-000000000001"
+        farmId:
+          type: string
+          format: uuid
+          example: "f1a2b3c4-1111-4000-a000-000000000001"
+        userId:
+          type: string
+          format: uuid
+          example: "b1a2b3c4-6666-4000-a000-000000000001"
+        fullName:
+          type: string
+          example: "Jamshid Aliyev"
+        phoneNumber:
+          type: string
+          example: "+998939876543"
+        role:
+          type: string
+          enum: [OWNER, MANAGER, AGRONOMIST, WORKER]
+          example: "AGRONOMIST"
+        permissionsMask:
+          type: string
+          example: "READ,WRITE_ACTIVITY,RECORD_HARVEST"
+        status:
+          type: string
+          enum: [INVITED, ACTIVE, REVOKED]
+          example: "ACTIVE"
+
+    AddFarmMemberRequest:
+      type: object
+      required:
+        - phoneNumber
+        - role
+        - permissionsMask
+      properties:
+        phoneNumber:
+          type: string
+          pattern: '^(\+998)[0-9]{9}$'
+          example: "+998939876543"
+        role:
+          type: string
+          enum: [OWNER, MANAGER, AGRONOMIST, WORKER]
+          example: "AGRONOMIST"
+        permissionsMask:
+          type: string
+          example: "READ,WRITE_ACTIVITY,RECORD_HARVEST"
+
+    FieldDto:
+      type: object
+      required:
+        - id
+        - farmId
+        - name
+        - area
+        - areaUnit
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "c1d2e3f4-2222-4000-a000-000000000001"
+        farmId:
+          type: string
+          format: uuid
+          example: "f1a2b3c4-1111-4000-a000-000000000001"
+        name:
+          type: string
+          example: "1-Dala Issiqxona"
+        area:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,2})?$'
+          example: "1.20"
+        areaUnit:
+          type: string
+          enum: [HECTARE, SOTKA, SQM]
+          example: "HECTARE"
+        boundaryGeojson:
+          type: object
+          nullable: true
+          example:
+            type: "Polygon"
+            coordinates: [[[69.215, 41.285], [69.218, 41.285], [69.218, 41.282], [69.215, 41.282], [69.215, 41.285]]]
+        notes:
+          type: string
+          nullable: true
+          example: "Tomchilatib sug'orish o'rnatilgan"
+
+    CreateFieldRequest:
+      type: object
+      required:
+        - name
+        - area
+        - areaUnit
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Optional client-generated UUID for offline sync.
+          example: "c1d2e3f4-2222-4000-a000-000000000001"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "1-Dala Issiqxona"
+        area:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,2})?$'
+          example: "1.20"
+        areaUnit:
+          type: string
+          enum: [HECTARE, SOTKA, SQM]
+          example: "HECTARE"
+        boundaryGeojson:
+          type: object
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+
+    UpdateFieldRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        area:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,2})?$'
+        areaUnit:
+          type: string
+          enum: [HECTARE, SOTKA, SQM]
+        notes:
+          type: string
+          nullable: true
+
+    CropCycleDto:
+      type: object
+      required:
+        - id
+        - fieldId
+        - cropType
+        - plantingDate
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "c2d3e4f5-3333-4000-a000-000000000001"
+        fieldId:
+          type: string
+          format: uuid
+          example: "c1d2e3f4-2222-4000-a000-000000000001"
+        cropType:
+          type: string
+          example: "Pomidor (Tomato)"
+        variety:
+          type: string
+          nullable: true
+          example: "Pink Paradise F1"
+        plantingDate:
+          type: string
+          format: date
+          example: "2026-03-15"
+        expectedHarvestDate:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-07-01"
+        actualHarvestDate:
+          type: string
+          format: date
+          nullable: true
+          example: null
+        status:
+          type: string
+          enum: [PLANNED, ACTIVE, HARVESTED, TERMINATED]
+          example: "ACTIVE"
+
+    CreateCropCycleRequest:
+      type: object
+      required:
+        - fieldId
+        - cropType
+        - plantingDate
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Optional client-generated UUID for offline sync.
+        fieldId:
+          type: string
+          format: uuid
+        cropType:
+          type: string
+          example: "Pomidor (Tomato)"
+        variety:
+          type: string
+          nullable: true
+          example: "Pink Paradise F1"
+        plantingDate:
+          type: string
+          format: date
+          example: "2026-03-15"
+        expectedHarvestDate:
+          type: string
+          format: date
+          nullable: true
+          example: "2026-07-01"
+
+    UpdateCropCycleRequest:
+      type: object
+      properties:
+        expectedHarvestDate:
+          type: string
+          format: date
+        actualHarvestDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [PLANNED, ACTIVE, HARVESTED, TERMINATED]
+
+    FarmActivityDto:
+      type: object
+      required:
+        - id
+        - cropCycleId
+        - fieldId
+        - activityType
+        - activityTimestamp
+        - syncVersion
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-4444-4000-a000-000000000001"
+        cropCycleId:
+          type: string
+          format: uuid
+        fieldId:
+          type: string
+          format: uuid
+        activityType:
+          type: string
+          enum: [PLANTING, IRRIGATION, FERTILIZING, CHEMICAL_TREATMENT, WEEDING, PRUNING, INSPECTION, HARVEST]
+          example: "FERTILIZING"
+        activityTimestamp:
+          type: string
+          format: date-time
+          example: "2026-05-10T06:30:00Z"
+        quantity:
+          type: string
+          nullable: true
+          example: "25.000"
+        unit:
+          type: string
+          nullable: true
+          example: "KG"
+        notes:
+          type: string
+          nullable: true
+          example: "Kaliy sulfat"
+        syncVersion:
+          type: integer
+          example: 1
+
+    CreateFarmActivityRequest:
+      type: object
+      required:
+        - cropCycleId
+        - fieldId
+        - activityType
+        - activityTimestamp
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Client-generated UUIDv4 for offline recording.
+          example: "a1b2c3d4-4444-4000-a000-000000000001"
+        cropCycleId:
+          type: string
+          format: uuid
+        fieldId:
+          type: string
+          format: uuid
+        activityType:
+          type: string
+          enum: [PLANTING, IRRIGATION, FERTILIZING, CHEMICAL_TREATMENT, WEEDING, PRUNING, INSPECTION, HARVEST]
+        activityTimestamp:
+          type: string
+          format: date-time
+        quantity:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,3})?$'
+          nullable: true
+          example: "25.000"
+        unit:
+          type: string
+          nullable: true
+          example: "KG"
+        notes:
+          type: string
+          nullable: true
+        clientMutationId:
+          type: string
+          example: "mut-a1b2-1001"
+        syncVersion:
+          type: integer
+          default: 1
+
+    ActivityBatchSyncRequest:
+      type: object
+      required:
+        - clientBatchSyncId
+        - mutations
+      properties:
+        clientBatchSyncId:
+          type: string
+          example: "sync-batch-20261014-001"
+        mutations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityMutationItem'
+
+    ActivityMutationItem:
+      type: object
+      required:
+        - clientMutationId
+        - action
+        - entityId
+        - clientSyncVersion
+        - payload
+      properties:
+        clientMutationId:
+          type: string
+          example: "mut-a1b2-1001"
+        action:
+          type: string
+          enum: [CREATE, UPDATE]
+          example: "CREATE"
+        entityId:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-4444-4000-a000-000000000001"
+        clientSyncVersion:
+          type: integer
+          example: 1
+        payload:
+          $ref: '#/components/schemas/CreateFarmActivityRequest'
+
+    ActivityBatchSyncResponse:
+      type: object
+      required:
+        - clientBatchSyncId
+        - processedAt
+        - results
+      properties:
+        clientBatchSyncId:
+          type: string
+          example: "sync-batch-20261014-001"
+        processedAt:
+          type: string
+          format: date-time
+          example: "2026-10-14T10:00:00Z"
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivitySyncResultItem'
+
+    ActivitySyncResultItem:
+      type: object
+      required:
+        - clientMutationId
+        - entityId
+        - status
+        - serverSyncVersion
+      properties:
+        clientMutationId:
+          type: string
+          example: "mut-a1b2-1001"
+        entityId:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-4444-4000-a000-000000000001"
+        status:
+          type: string
+          enum: [CREATED, UPDATED, CONFLICT, REJECTED]
+          example: "CREATED"
+        serverSyncVersion:
+          type: integer
+          example: 1
+        serverUpdatedAt:
+          type: string
+          format: date-time
+          example: "2026-10-14T10:00:00Z"
+
+    HarvestBatchDto:
+      type: object
+      required:
+        - id
+        - farmId
+        - cropCycleId
+        - cropType
+        - recordedQuantity
+        - unallocatedQuantity
+        - unitCode
+        - harvestDate
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "d1b2c3d4-5555-4000-a000-000000000001"
+        farmId:
+          type: string
+          format: uuid
+          example: "f1a2b3c4-1111-4000-a000-000000000001"
+        cropCycleId:
+          type: string
+          format: uuid
+          example: "c2d3e4f5-3333-4000-a000-000000000001"
+        cropType:
+          type: string
+          example: "Pomidor (Tomato)"
+        qualityGrade:
+          type: string
+          enum: [PREMIUM, FIRST_CLASS, SECOND_CLASS, STANDARD, INDUSTRIAL]
+          nullable: true
+          example: "FIRST_CLASS"
+        recordedQuantity:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,3})?$'
+          example: "5000.000"
+        unallocatedQuantity:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,3})?$'
+          example: "3000.000"
+        unitCode:
+          type: string
+          example: "KG"
+        harvestDate:
+          type: string
+          format: date
+          example: "2026-07-02"
+        storageLocationNotes:
+          type: string
+          nullable: true
+          example: "1-Omborxona, A-seksiya"
+        status:
+          type: string
+          enum: [RECORDED, PARTIALLY_ALLOCATED, FULLY_ALLOCATED, ARCHIVED]
+          example: "PARTIALLY_ALLOCATED"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-07-02T10:00:00Z"
+
+    CreateHarvestBatchRequest:
+      type: object
+      required:
+        - cropCycleId
+        - cropType
+        - recordedQuantity
+        - unitCode
+        - harvestDate
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Client-generated UUID for offline batch creation.
+        cropCycleId:
+          type: string
+          format: uuid
+        cropType:
+          type: string
+          example: "Pomidor (Tomato)"
+        qualityGrade:
+          type: string
+          enum: [PREMIUM, FIRST_CLASS, SECOND_CLASS, STANDARD, INDUSTRIAL]
+          example: "FIRST_CLASS"
+        recordedQuantity:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,3})?$'
+          example: "5000.000"
+        unitCode:
+          type: string
+          example: "KG"
+        harvestDate:
+          type: string
+          format: date
+          example: "2026-07-02"
+        storageLocationNotes:
+          type: string
+          nullable: true
+
+    # -----------------------------------------------------------------------
+    # Marketplace Publication Bridge Schemas
+    # -----------------------------------------------------------------------
+    PublishHarvestListingRequest:
+      type: object
+      required:
+        - harvestBatchId
+        - cropType
+        - allocatedQuantity
+        - unitCode
+        - isRfqEnabled
+        - minOrderQuantity
+        - stepQuantity
+        - region
+        - district
+      properties:
+        harvestBatchId:
+          type: string
+          format: uuid
+          example: "d1b2c3d4-5555-4000-a000-000000000001"
+        cropType:
+          type: string
+          example: "Pomidor (Pink Paradise)"
+        qualityGrade:
+          type: string
+          enum: [PREMIUM, FIRST_CLASS, SECOND_CLASS, STANDARD, INDUSTRIAL]
+          example: "FIRST_CLASS"
+        allocatedQuantity:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,3})?$'
+          example: "2000.000"
+        unitCode:
+          type: string
+          example: "KG"
+        unitPrice:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,2})?$'
+          nullable: true
+          example: "6500.00"
+        currency:
+          type: string
+          default: "UZS"
+          example: "UZS"
+        isRfqEnabled:
+          type: boolean
+          default: false
+          example: false
+        minOrderQuantity:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,3})?$'
+          example: "100.000"
+        stepQuantity:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,3})?$'
+          example: "10.000"
+        region:
+          type: string
+          example: "Toshkent viloyati"
+        district:
+          type: string
+          example: "Yangiyoʻl tumani"
+        mediaFileIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 5
+          example: ["e1b2c3d4-6666-4000-a000-000000000001"]
+
+    HarvestListingDto:
+      type: object
+      required:
+        - id
+        - sellerUserId
+        - harvestBatchId
+        - cropType
+        - allocatedQuantity
+        - availableQuantity
+        - reservedQuantity
+        - soldQuantity
+        - unitCode
+        - currency
+        - isRfqEnabled
+        - minOrderQuantity
+        - stepQuantity
+        - region
+        - district
+        - status
+        - publishedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "9a8b7c6d-7777-4000-a000-000000000001"
+        sellerUserId:
+          type: string
+          format: uuid
+          example: "e4b3c2a1-0000-4000-a000-000000000001"
+        harvestBatchId:
+          type: string
+          format: uuid
+          example: "d1b2c3d4-5555-4000-a000-000000000001"
+        cropType:
+          type: string
+          example: "Pomidor (Pink Paradise)"
+        qualityGrade:
+          type: string
+          example: "FIRST_CLASS"
+        allocatedQuantity:
+          type: string
+          example: "2000.000"
+        availableQuantity:
+          type: string
+          example: "2000.000"
+        reservedQuantity:
+          type: string
+          example: "0.000"
+        soldQuantity:
+          type: string
+          example: "0.000"
+        unitCode:
+          type: string
+          example: "KG"
+        unitPrice:
+          type: string
+          nullable: true
+          example: "6500.00"
+        currency:
+          type: string
+          example: "UZS"
+        isRfqEnabled:
+          type: boolean
+          example: false
+        minOrderQuantity:
+          type: string
+          example: "100.000"
+        stepQuantity:
+          type: string
+          example: "10.000"
+        region:
+          type: string
+          example: "Toshkent viloyati"
+        district:
+          type: string
+          example: "Yangiyoʻl tumani"
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED, PAUSED, SOLD_OUT, ARCHIVED]
+          example: "PUBLISHED"
+        publishedAt:
+          type: string
+          format: date-time
+          example: "2026-07-02T11:00:00Z"
+        mediaFileIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          example: ["e1b2c3d4-6666-4000-a000-000000000001"]
+
+    # -----------------------------------------------------------------------
+    # Pagination Envelopes
+    # -----------------------------------------------------------------------
+    PaginatedResponseMeta:
+      type: object
+      required:
+        - pageNumber
+        - pageSize
+        - totalElements
+        - totalPages
+        - isLast
+      properties:
+        pageNumber:
+          type: integer
+          example: 0
+        pageSize:
+          type: integer
+          example: 20
+        totalElements:
+          type: integer
+          example: 45
+        totalPages:
+          type: integer
+          example: 3
+        isLast:
+          type: boolean
+          example: false
+
+    PaginatedFarmResponse:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseMeta'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/FarmDto'
+
+    PaginatedFieldResponse:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseMeta'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/FieldDto'
+
+    PaginatedCropCycleResponse:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseMeta'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/CropCycleDto'
+
+    PaginatedActivityResponse:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseMeta'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/FarmActivityDto'
+
+    PaginatedHarvestBatchResponse:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseMeta'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/HarvestBatchDto'
+
+    PaginatedHarvestListingResponse:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseMeta'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/HarvestListingDto'
+
+    # -----------------------------------------------------------------------
+    # Request-for-Quote (RFQ) Negotiation Schemas
+    # -----------------------------------------------------------------------
+    CreateInquiryRequest:
+      type: object
+      required:
+        - quantity
+        - unitCode
+      properties:
+        quantity:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,3})?$'
+          example: "500.000"
+        unitCode:
+          type: string
+          example: "KG"
+        unitPrice:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,2})?$'
+          nullable: true
+          example: "6200.00"
+        currency:
+          type: string
+          default: "UZS"
+          example: "UZS"
+        deliveryTerms:
+          type: string
+          nullable: true
+          example: "EXW - Seller warehouse pickup"
+        notes:
+          type: string
+          nullable: true
+          example: "Interested in 500 kg batch, can collect on Monday"
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-07-10T18:00:00Z"
+
+    SubmitOfferRequest:
+      type: object
+      required:
+        - quantity
+        - unitPrice
+      properties:
+        quantity:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,3})?$'
+          example: "500.000"
+        unitPrice:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,2})?$'
+          example: "6400.00"
+        currency:
+          type: string
+          default: "UZS"
+          example: "UZS"
+        deliveryTerms:
+          type: string
+          nullable: true
+          example: "EXW - Warehouse 1"
+        notes:
+          type: string
+          nullable: true
+          example: "Counter-offer: 6400 UZS/kg is lowest price for this grade"
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-07-09T18:00:00Z"
+
+    RejectInquiryRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          nullable: true
+          example: "Price unacceptable"
+
+    WithdrawInquiryRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          nullable: true
+          example: "Sourced from another supplier"
+
+    InquiryOfferDto:
+      type: object
+      required:
+        - id
+        - offerNumber
+        - proposerUserId
+        - proposerRole
+        - quantity
+        - unitCode
+        - currency
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "off-1111-2222-3333-444444444441"
+        offerNumber:
+          type: integer
+          example: 1
+        proposerUserId:
+          type: string
+          format: uuid
+          example: "e4b3c2a1-0000-4000-a000-000000000002"
+        proposerRole:
+          type: string
+          enum: [BUYER, SELLER]
+          example: "BUYER"
+        quantity:
+          type: string
+          example: "500.000"
+        unitCode:
+          type: string
+          example: "KG"
+        unitPrice:
+          type: string
+          nullable: true
+          example: "6200.00"
+        currency:
+          type: string
+          example: "UZS"
+        totalPrice:
+          type: string
+          nullable: true
+          example: "3100000.00"
+        deliveryTerms:
+          type: string
+          nullable: true
+          example: "EXW - Seller warehouse pickup"
+        notes:
+          type: string
+          nullable: true
+          example: "Interested in 500 kg batch, can collect on Monday"
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-07-10T18:00:00Z"
+        status:
+          type: string
+          enum: [PROPOSED, ACCEPTED, SUPERSEDED, REJECTED, EXPIRED]
+          example: "PROPOSED"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-07-03T10:00:00Z"
+
+    InquirySummaryDto:
+      type: object
+      required:
+        - id
+        - harvestListingId
+        - cropType
+        - unitCode
+        - buyerUserId
+        - sellerUserId
+        - status
+        - currentOfferNumber
+        - lastOfferAt
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "inq-9a8b7c6d-1111-4000-a000-000000000001"
+        harvestListingId:
+          type: string
+          format: uuid
+          example: "lst-9a8b7c6d-7777-4000-a000-000000000001"
+        cropType:
+          type: string
+          example: "Pomidor (Pink Paradise)"
+        unitCode:
+          type: string
+          example: "KG"
+        buyerUserId:
+          type: string
+          format: uuid
+          example: "e4b3c2a1-0000-4000-a000-000000000002"
+        sellerUserId:
+          type: string
+          format: uuid
+          example: "e4b3c2a1-0000-4000-a000-000000000001"
+        status:
+          type: string
+          enum: [OPEN, AGREED, REJECTED, WITHDRAWN, EXPIRED]
+          example: "OPEN"
+        currentOfferNumber:
+          type: integer
+          example: 1
+        currentOfferProposerRole:
+          type: string
+          enum: [BUYER, SELLER]
+          example: "BUYER"
+        currentQuantity:
+          type: string
+          example: "500.000"
+        currentUnitPrice:
+          type: string
+          nullable: true
+          example: "6200.00"
+        currentCurrency:
+          type: string
+          example: "UZS"
+        agreedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        lastOfferAt:
+          type: string
+          format: date-time
+          example: "2026-07-03T10:00:00Z"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-07-03T10:00:00Z"
+
+    InquiryDetailDto:
+      type: object
+      required:
+        - id
+        - harvestListingId
+        - cropType
+        - unitCode
+        - buyerUserId
+        - sellerUserId
+        - status
+        - version
+        - createdAt
+        - updatedAt
+        - offers
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "inq-9a8b7c6d-1111-4000-a000-000000000001"
+        harvestListingId:
+          type: string
+          format: uuid
+          example: "lst-9a8b7c6d-7777-4000-a000-000000000001"
+        cropType:
+          type: string
+          example: "Pomidor (Pink Paradise)"
+        unitCode:
+          type: string
+          example: "KG"
+        buyerUserId:
+          type: string
+          format: uuid
+          example: "e4b3c2a1-0000-4000-a000-000000000002"
+        sellerUserId:
+          type: string
+          format: uuid
+          example: "e4b3c2a1-0000-4000-a000-000000000001"
+        status:
+          type: string
+          enum: [OPEN, AGREED, REJECTED, WITHDRAWN, EXPIRED]
+          example: "OPEN"
+        agreedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        rejectionReason:
+          type: string
+          nullable: true
+          example: null
+        currentOffer:
+          $ref: '#/components/schemas/InquiryOfferDto'
+        agreedOffer:
+          $ref: '#/components/schemas/InquiryOfferDto'
+        offers:
+          type: array
+          items:
+            $ref: '#/components/schemas/InquiryOfferDto'
+        version:
+          type: integer
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-07-03T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-07-03T10:00:00Z"
+
+    PaginatedInquirySummaryResponse:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseMeta'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/InquirySummaryDto'
+
+    CreateInputOrderRequest:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/InputOrderItemRequest'
+        deliveryType:
+          type: string
+          enum: [BUYER_ARRANGES, SELLER_DELIVERS, HOSIL_LOGISTIKA]
+          default: BUYER_ARRANGES
+          example: "BUYER_ARRANGES"
+        deliveryAddress:
+          type: string
+          nullable: true
+          example: "Toshkent viloyati, Chirchiq ombori"
+        deliveryTerms:
+          type: string
+          nullable: true
+          example: "Olib ketish sharti bilan"
+        notes:
+          type: string
+          nullable: true
+          example: "Tezroq yuklash soʻraladi"
+
+    InputOrderItemRequest:
+      type: object
+      required:
+        - sellerOfferId
+        - quantity
+        - unitCode
+      properties:
+        sellerOfferId:
+          type: string
+          format: uuid
+          example: "ofr-9a8b7c6d-1111-4000-a000-000000000001"
+        quantity:
+          type: number
+          minimum: 0.001
+          example: 10.000
+        unitCode:
+          type: string
+          example: "BAG_50KG"
+
+    CreateWholesaleOrderRequest:
+      type: object
+      required:
+        - inquiryId
+      properties:
+        inquiryId:
+          type: string
+          format: uuid
+          example: "inq-9a8b7c6d-1111-4000-a000-000000000001"
+        deliveryType:
+          type: string
+          enum: [BUYER_ARRANGES, SELLER_DELIVERS, HOSIL_LOGISTIKA]
+          default: BUYER_ARRANGES
+          example: "BUYER_ARRANGES"
+        deliveryAddress:
+          type: string
+          nullable: true
+          example: "Toshkent viloyati, Yangiyoʻl tumani, Guliston MFY"
+        notes:
+          type: string
+          nullable: true
+          example: "Ertalab soat 8:00 da yuklashga mashina boradi"
+
+    OrderDecisionRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          nullable: true
+          example: "Hosilda kutilmagan sifat pasayishi aniqlandi"
+
+    OrderItemDto:
+      type: object
+      required:
+        - id
+        - itemSnapshotTitle
+        - quantity
+        - unitCode
+        - unitPrice
+        - subtotalAmount
+        - currency
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "itm-9a8b7c6d-1111-4000-a000-000000000001"
+        harvestListingId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "lst-9a8b7c6d-7777-4000-a000-000000000001"
+        sellerOfferId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "ofr-9a8b7c6d-1111-4000-a000-000000000001"
+        catalogProductId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "prd-9a8b7c6d-1111-4000-a000-000000000001"
+        itemSnapshotTitle:
+          type: string
+          example: "Eksportbop Golden Olma"
+        cropType:
+          type: string
+          nullable: true
+          example: "Olma (Golden)"
+        quantity:
+          type: number
+          example: 1500.000
+        unitCode:
+          type: string
+          example: "KG"
+        unitPrice:
+          type: number
+          example: 11200.00
+        subtotalAmount:
+          type: number
+          example: 16800000.00
+        currency:
+          type: string
+          example: "UZS"
+
+    OrderStatusHistoryDto:
+      type: object
+      required:
+        - id
+        - toStatus
+        - actorRole
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "osh-9a8b7c6d-1111-4000-a000-000000000001"
+        fromStatus:
+          type: string
+          nullable: true
+          example: "AWAITING_SELLER_CONFIRMATION"
+        toStatus:
+          type: string
+          example: "CONFIRMED"
+        actorUserId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "e4b3c2a1-0000-4000-a000-000000000001"
+        actorRole:
+          type: string
+          example: "SELLER"
+        reason:
+          type: string
+          nullable: true
+          example: "Buyurtma qabul qilindi va tasdiqlandi"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-10-16T10:00:00Z"
+
+    InventoryReservationDto:
+      type: object
+      required:
+        - id
+        - orderId
+        - reservedQuantity
+        - unitCode
+        - expiresAt
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "res-9a8b7c6d-1111-4000-a000-000000000001"
+        orderId:
+          type: string
+          format: uuid
+          example: "ord-9a8b7c6d-1111-4000-a000-000000000001"
+        harvestListingId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "lst-9a8b7c6d-7777-4000-a000-000000000001"
+        sellerOfferId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "ofr-9a8b7c6d-1111-4000-a000-000000000001"
+        reservedQuantity:
+          type: number
+          example: 1500.000
+        unitCode:
+          type: string
+          example: "KG"
+        expiresAt:
+          type: string
+          format: date-time
+          example: "2026-10-17T10:00:00Z"
+        status:
+          type: string
+          enum: [ACTIVE, CONFIRMED_SOLD, RELEASED_EXPIRED, RELEASED_CANCELLED]
+          example: "ACTIVE"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-10-16T10:00:00Z"
+
+    OrderSummaryDto:
+      type: object
+      required:
+        - id
+        - orderNumber
+        - buyerUserId
+        - sellerUserId
+        - totalAmount
+        - currency
+        - status
+        - deliveryType
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "ord-9a8b7c6d-1111-4000-a000-000000000001"
+        orderNumber:
+          type: string
+          example: "ORD-20261016-A7B8C9"
+        buyerUserId:
+          type: string
+          format: uuid
+          example: "e4b3c2a1-0000-4000-a000-000000000002"
+        sellerUserId:
+          type: string
+          format: uuid
+          example: "e4b3c2a1-0000-4000-a000-000000000001"
+        harvestListingId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "lst-9a8b7c6d-7777-4000-a000-000000000001"
+        cropType:
+          type: string
+          nullable: true
+          example: "Olma (Golden)"
+        totalAmount:
+          type: number
+          example: 16800000.00
+        currency:
+          type: string
+          example: "UZS"
+        status:
+          type: string
+          enum: [DRAFT, AWAITING_SELLER_CONFIRMATION, PENDING_PAYMENT, CONFIRMED, PROCESSING, READY_FOR_DISPATCH, IN_TRANSIT, COMPLETED, CANCELLED, DISPUTED]
+          example: "AWAITING_SELLER_CONFIRMATION"
+        deliveryType:
+          type: string
+          example: "BUYER_ARRANGES"
+        confirmationExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-10-17T10:00:00Z"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-10-16T10:00:00Z"
+
+    OrderDetailDto:
+      type: object
+      required:
+        - id
+        - orderNumber
+        - buyerUserId
+        - sellerUserId
+        - orderFlowType
+        - totalAmount
+        - currency
+        - status
+        - deliveryType
+        - items
+        - history
+        - version
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "ord-9a8b7c6d-1111-4000-a000-000000000001"
+        orderNumber:
+          type: string
+          example: "ORD-20261016-A7B8C9"
+        buyerUserId:
+          type: string
+          format: uuid
+          example: "e4b3c2a1-0000-4000-a000-000000000002"
+        sellerUserId:
+          type: string
+          format: uuid
+          example: "e4b3c2a1-0000-4000-a000-000000000001"
+        inquiryId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "inq-9a8b7c6d-1111-4000-a000-000000000001"
+        agreedOfferId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "ofr-9a8b7c6d-1111-4000-a000-000000000001"
+        harvestListingId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "lst-9a8b7c6d-7777-4000-a000-000000000001"
+        orderFlowType:
+          type: string
+          example: "HARVEST_PURCHASE_REQUEST"
+        totalAmount:
+          type: number
+          example: 16800000.00
+        currency:
+          type: string
+          example: "UZS"
+        status:
+          type: string
+          enum: [DRAFT, AWAITING_SELLER_CONFIRMATION, PENDING_PAYMENT, CONFIRMED, PROCESSING, READY_FOR_DISPATCH, IN_TRANSIT, COMPLETED, CANCELLED, DISPUTED]
+          example: "AWAITING_SELLER_CONFIRMATION"
+        deliveryType:
+          type: string
+          example: "BUYER_ARRANGES"
+        deliveryAddress:
+          type: string
+          nullable: true
+          example: "Toshkent viloyati, Yangiyoʻl tumani, Guliston MFY"
+        deliveryTerms:
+          type: string
+          nullable: true
+          example: "FCA (Samarqand)"
+        notes:
+          type: string
+          nullable: true
+          example: "Ertalab soat 8:00 da yuklashga mashina boradi"
+        rejectionReason:
+          type: string
+          nullable: true
+          example: null
+        cancellationReason:
+          type: string
+          nullable: true
+          example: null
+        confirmationExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-10-17T10:00:00Z"
+        paymentExpiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        confirmedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        cancelledAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemDto'
+        reservation:
+          $ref: '#/components/schemas/InventoryReservationDto'
+        reservations:
+          type: array
+          items:
+            $ref: '#/components/schemas/InventoryReservationDto'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderStatusHistoryDto'
+        version:
+          type: integer
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-10-16T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-10-16T10:00:00Z"
+
+    PaginatedOrderSummaryResponse:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseMeta'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderSummaryDto'
+
+    CategoryDto:
+      type: object
+      required:
+        - id
+        - code
+        - nameUz
+        - nameRu
+        - categoryType
+        - displayOrder
+        - isActive
+        - allowedUnits
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          example: "FERTILIZER"
+        nameUz:
+          type: string
+          example: "Oʻgʻitlar va kimyoviy moddalar"
+        nameRu:
+          type: string
+          example: "Удобрения и агрохимия"
+        categoryType:
+          type: string
+          example: "INPUT"
+        displayOrder:
+          type: integer
+          example: 1
+        isActive:
+          type: boolean
+          example: true
+        allowedUnits:
+          type: array
+          items:
+            type: string
+          example: ["KG", "BAG_50KG", "TON"]
+
+    CatalogProductSummaryDto:
+      type: object
+      required:
+        - id
+        - categoryId
+        - categoryNameUz
+        - categoryNameRu
+        - nameUz
+        - nameRu
+        - minPrice
+        - offerCount
+      properties:
+        id:
+          type: string
+          format: uuid
+        categoryId:
+          type: string
+          format: uuid
+        categoryNameUz:
+          type: string
+          example: "Oʻgʻitlar va kimyoviy moddalar"
+        categoryNameRu:
+          type: string
+          example: "Удобрения и агрохимия"
+        nameUz:
+          type: string
+          example: "Azotli oʻgʻit (Ammiakli selitra)"
+        nameRu:
+          type: string
+          example: "Аммиачная селитра"
+        brand:
+          type: string
+          nullable: true
+          example: "Maxam-Chirchiq"
+        form:
+          type: string
+          nullable: true
+          example: "GRANULAR"
+        activeIngredient:
+          type: string
+          nullable: true
+          example: "N 34.4%"
+        minPrice:
+          type: number
+          nullable: true
+          example: 3200.00
+        offerCount:
+          type: integer
+          example: 3
+
+    CatalogProductDetailDto:
+      type: object
+      required:
+        - id
+        - categoryId
+        - categoryNameUz
+        - categoryNameRu
+        - nameUz
+        - nameRu
+        - minPrice
+        - offerCount
+        - allowedUnits
+      properties:
+        id:
+          type: string
+          format: uuid
+        categoryId:
+          type: string
+          format: uuid
+        categoryNameUz:
+          type: string
+          example: "Oʻgʻitlar va kimyoviy moddalar"
+        categoryNameRu:
+          type: string
+          example: "Удобрения и агрохимия"
+        nameUz:
+          type: string
+          example: "Azotli oʻgʻit (Ammiakli selitra)"
+        nameRu:
+          type: string
+          example: "Аммиачная селитра"
+        descriptionUz:
+          type: string
+          nullable: true
+          example: "Oʻsimliklarning oʻsish davrida ozuqlantirish uchun yuqori samarali azotli oʻgʻit."
+        descriptionRu:
+          type: string
+          nullable: true
+          example: "Высокоэффективное азотное удобрение для подкормки растений в период активного роста."
+        brand:
+          type: string
+          nullable: true
+          example: "Maxam-Chirchiq"
+        manufacturerCountry:
+          type: string
+          nullable: true
+          example: "Oʻzbekiston"
+        form:
+          type: string
+          nullable: true
+          example: "GRANULAR"
+        activeIngredient:
+          type: string
+          nullable: true
+          example: "N 34.4%"
+        concentration:
+          type: string
+          nullable: true
+          example: "34.4%"
+        targetCrops:
+          type: string
+          nullable: true
+          example: "Paxta, bugʻdoy, mevali daraxtlar, sabzavotlar"
+        applicationMethod:
+          type: string
+          nullable: true
+          example: "Ildiz orqali yoki tuproqqa solish"
+        minPrice:
+          type: number
+          nullable: true
+          example: 3200.00
+        offerCount:
+          type: integer
+          example: 3
+        allowedUnits:
+          type: array
+          items:
+            type: string
+          example: ["KG", "BAG_50KG", "TON"]
+
+    CreateCatalogProductRequest:
+      type: object
+      required:
+        - categoryId
+        - nameUz
+        - nameRu
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+        nameUz:
+          type: string
+          example: "Azotli oʻgʻit (Ammiakli selitra)"
+        nameRu:
+          type: string
+          example: "Аммиачная селитра"
+        descriptionUz:
+          type: string
+          nullable: true
+          example: "Oʻsimliklarning oʻsish davrida ozuqlantirish uchun yuqori samarali azotli oʻgʻit."
+        descriptionRu:
+          type: string
+          nullable: true
+          example: "Высокоэффективное азотное удобрение для подкормки растений в период активного роста."
+        brand:
+          type: string
+          nullable: true
+          example: "Maxam-Chirchiq"
+        manufacturerCountry:
+          type: string
+          nullable: true
+          example: "Oʻzbekiston"
+        form:
+          type: string
+          nullable: true
+          example: "GRANULAR"
+        activeIngredient:
+          type: string
+          nullable: true
+          example: "N 34.4%"
+        concentration:
+          type: string
+          nullable: true
+          example: "34.4%"
+        targetCrops:
+          type: string
+          nullable: true
+          example: "Paxta, bugʻdoy, mevali daraxtlar, sabzavotlar"
+        applicationMethod:
+          type: string
+          nullable: true
+          example: "Ildiz orqali yoki tuproqqa solish"
+
+    PublicSellerOfferDto:
+      type: object
+      required:
+        - id
+        - catalogProductId
+        - sellerUserId
+        - pricePerUnit
+        - currency
+        - unitCode
+        - minOrderQuantity
+        - availableQuantity
+        - deliveryAvailable
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        catalogProductId:
+          type: string
+          format: uuid
+        sellerUserId:
+          type: string
+          format: uuid
+        sellerBusinessName:
+          type: string
+          nullable: true
+          example: "Agro Kimyo Ta'minot MCHJ"
+        isSellerVerified:
+          type: boolean
+          example: true
+        pricePerUnit:
+          type: number
+          example: 3200.00
+        currency:
+          type: string
+          example: "UZS"
+        unitCode:
+          type: string
+          example: "KG"
+        minOrderQuantity:
+          type: number
+          example: 50.000
+        availableQuantity:
+          type: number
+          example: 5000.000
+        region:
+          type: string
+          nullable: true
+          example: "Toshkent viloyati"
+        district:
+          type: string
+          nullable: true
+          example: "Chinoz tumani"
+        warehouseLocation:
+          type: string
+          nullable: true
+          example: "Chinoz agro-markazi, 4-ombor"
+        deliveryAvailable:
+          type: boolean
+          example: true
+        packagingDetails:
+          type: string
+          nullable: true
+          example: "50 kg qoplarda"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-10-16T10:00:00Z"
+
+    SellerOfferDetailDto:
+      type: object
+      required:
+        - id
+        - catalogProductId
+        - catalogProductNameUz
+        - catalogProductNameRu
+        - sellerUserId
+        - pricePerUnit
+        - currency
+        - unitCode
+        - minOrderQuantity
+        - availableQuantity
+        - deliveryAvailable
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        catalogProductId:
+          type: string
+          format: uuid
+        catalogProductNameUz:
+          type: string
+          example: "Azotli oʻgʻit (Ammiakli selitra)"
+        catalogProductNameRu:
+          type: string
+          example: "Аммиачная селитра"
+        sellerUserId:
+          type: string
+          format: uuid
+        pricePerUnit:
+          type: number
+          example: 3200.00
+        currency:
+          type: string
+          example: "UZS"
+        unitCode:
+          type: string
+          example: "KG"
+        minOrderQuantity:
+          type: number
+          example: 50.000
+        availableQuantity:
+          type: number
+          example: 5000.000
+        region:
+          type: string
+          nullable: true
+          example: "Toshkent viloyati"
+        district:
+          type: string
+          nullable: true
+          example: "Chinoz tumani"
+        warehouseLocation:
+          type: string
+          nullable: true
+          example: "Chinoz agro-markazi, 4-ombor"
+        deliveryAvailable:
+          type: boolean
+          example: true
+        packagingDetails:
+          type: string
+          nullable: true
+          example: "50 kg qoplarda"
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, OUT_OF_STOCK]
+          example: "ACTIVE"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-10-16T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-10-16T10:00:00Z"
+
+    CreateSellerOfferRequest:
+      type: object
+      required:
+        - catalogProductId
+        - pricePerUnit
+        - currency
+        - unitCode
+        - minOrderQuantity
+        - availableQuantity
+      properties:
+        catalogProductId:
+          type: string
+          format: uuid
+        pricePerUnit:
+          type: number
+          example: 3200.00
+        currency:
+          type: string
+          example: "UZS"
+        unitCode:
+          type: string
+          example: "KG"
+        minOrderQuantity:
+          type: number
+          example: 50.000
+        availableQuantity:
+          type: number
+          example: 5000.000
+        region:
+          type: string
+          nullable: true
+          example: "Toshkent viloyati"
+        district:
+          type: string
+          nullable: true
+          example: "Chinoz tumani"
+        warehouseLocation:
+          type: string
+          nullable: true
+          example: "Chinoz agro-markazi, 4-ombor"
+        deliveryAvailable:
+          type: boolean
+          example: true
+        packagingDetails:
+          type: string
+          nullable: true
+          example: "50 kg qoplarda"
+
+    UpdateSellerOfferRequest:
+      type: object
+      properties:
+        pricePerUnit:
+          type: number
+          example: 3300.00
+        minOrderQuantity:
+          type: number
+          example: 100.000
+        availableQuantity:
+          type: number
+          example: 4500.000
+        region:
+          type: string
+          nullable: true
+          example: "Toshkent viloyati"
+        district:
+          type: string
+          nullable: true
+          example: "Chinoz tumani"
+        warehouseLocation:
+          type: string
+          nullable: true
+          example: "Chinoz agro-markazi, 4-ombor"
+        deliveryAvailable:
+          type: boolean
+          nullable: true
+          example: true
+        packagingDetails:
+          type: string
+          nullable: true
+          example: "50 kg polietilen qoplarda"
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, OUT_OF_STOCK]
+          example: "ACTIVE"
+
+    PaginatedCatalogProductResponse:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseMeta'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/CatalogProductSummaryDto'
+
+    PaginatedPublicSellerOfferResponse:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseMeta'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/PublicSellerOfferDto'
+
+    PaginatedSellerOfferDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseMeta'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/SellerOfferDetailDto'
+
+    CreateShipmentRequest:
+      type: object
+      required:
+        - pickupWindowStart
+        - pickupWindowEnd
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        harvestBatchId:
+          type: string
+          format: uuid
+        cargoDescription:
+          type: string
+        cargoWeightKg:
+          type: number
+          format: double
+        cargoVolumeM3:
+          type: number
+          format: double
+        cargoType:
+          type: string
+        vehicleRequirements:
+          type: string
+        originRegion:
+          type: string
+        originDistrict:
+          type: string
+        originAddress:
+          type: string
+        originContactName:
+          type: string
+        originContactPhone:
+          type: string
+        destinationRegion:
+          type: string
+        destinationDistrict:
+          type: string
+        destinationAddress:
+          type: string
+        destinationContactName:
+          type: string
+        destinationContactPhone:
+          type: string
+        pickupWindowStart:
+          type: string
+          format: date-time
+        pickupWindowEnd:
+          type: string
+          format: date-time
+        deliveryDeadline:
+          type: string
+          format: date-time
+        specialInstructions:
+          type: string
+        idempotencyKey:
+          type: string
+
+    ShipmentRequestDetailDto:
+      type: object
+      required:
+        - id
+        - requestNumber
+        - requesterUserId
+        - cargoDescription
+        - cargoWeightKg
+        - originRegion
+        - originDistrict
+        - destinationRegion
+        - destinationDistrict
+        - pickupWindowStart
+        - pickupWindowEnd
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        requestNumber:
+          type: string
+        requesterUserId:
+          type: string
+          format: uuid
+        orderId:
+          type: string
+          format: uuid
+        harvestBatchId:
+          type: string
+          format: uuid
+        cargoDescription:
+          type: string
+        cargoWeightKg:
+          type: number
+          format: double
+        cargoVolumeM3:
+          type: number
+          format: double
+        cargoType:
+          type: string
+        vehicleRequirements:
+          type: string
+        originRegion:
+          type: string
+        originDistrict:
+          type: string
+        originAddress:
+          type: string
+          description: Masked for unassigned carriers ([HIDDEN_UNTIL_ASSIGNED]).
+        originContactName:
+          type: string
+        originContactPhone:
+          type: string
+          description: Masked for unassigned carriers ([HIDDEN_UNTIL_ASSIGNED]).
+        destinationRegion:
+          type: string
+        destinationDistrict:
+          type: string
+        destinationAddress:
+          type: string
+          description: Masked for unassigned carriers ([HIDDEN_UNTIL_ASSIGNED]).
+        destinationContactName:
+          type: string
+        destinationContactPhone:
+          type: string
+          description: Masked for unassigned carriers ([HIDDEN_UNTIL_ASSIGNED]).
+        pickupWindowStart:
+          type: string
+          format: date-time
+        pickupWindowEnd:
+          type: string
+          format: date-time
+        deliveryDeadline:
+          type: string
+          format: date-time
+        specialInstructions:
+          type: string
+        status:
+          type: string
+          enum: [REQUESTED, QUOTED, ACCEPTED, PICKUP_ARRANGED, PICKED_UP, IN_TRANSIT, DELIVERED, CANCELLED, EXPIRED]
+        assignedCarrierUserId:
+          type: string
+          format: uuid
+        cancellationReason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ShipmentRequestSummaryDto:
+      type: object
+      required:
+        - id
+        - requestNumber
+        - cargoDescription
+        - cargoWeightKg
+        - originRegion
+        - originDistrict
+        - destinationRegion
+        - destinationDistrict
+        - pickupWindowStart
+        - pickupWindowEnd
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        requestNumber:
+          type: string
+        orderId:
+          type: string
+          format: uuid
+        harvestBatchId:
+          type: string
+          format: uuid
+        cargoDescription:
+          type: string
+        cargoWeightKg:
+          type: number
+          format: double
+        originRegion:
+          type: string
+        originDistrict:
+          type: string
+        destinationRegion:
+          type: string
+        destinationDistrict:
+          type: string
+        pickupWindowStart:
+          type: string
+          format: date-time
+        pickupWindowEnd:
+          type: string
+          format: date-time
+        status:
+          type: string
+        assignedCarrierUserId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+
+    PaginatedShipmentRequestSummaryResponse:
+      allOf:
+        - $ref: '#/components/schemas/PaginatedResponseMeta'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/ShipmentRequestSummaryDto'
+
+    UpdateShipmentStatusRequest:
+      type: object
+      required:
+        - targetStatus
+      properties:
+        targetStatus:
+          type: string
+          enum: [PICKUP_ARRANGED, PICKED_UP, IN_TRANSIT, DELIVERED]
+        notes:
+          type: string
+
+    CancelShipmentRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+
+    ShipmentStatusHistoryDto:
+      type: object
+      required:
+        - id
+        - shipmentRequestId
+        - toStatus
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        shipmentRequestId:
+          type: string
+          format: uuid
+        fromStatus:
+          type: string
+        toStatus:
+          type: string
+        actorUserId:
+          type: string
+          format: uuid
+        actorRole:
+          type: string
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    CarrierProfileDto:
+      type: object
+      required:
+        - id
+        - userId
+        - verificationStatus
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        companyName:
+          type: string
+        licenseNumber:
+          type: string
+        verificationStatus:
+          type: string
+          enum: [UNVERIFIED, PENDING, VERIFIED, REJECTED]
+        verifiedAt:
+          type: string
+          format: date-time
+
+    CreateCarrierProfileRequest:
+      type: object
+      required:
+        - companyName
+        - licenseNumber
+      properties:
+        companyName:
+          type: string
+        licenseNumber:
+          type: string
+
+    UpdateCarrierVerificationRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [UNVERIFIED, PENDING, VERIFIED, REJECTED]
+          description: Target verification status. Setting to VERIFIED authorizes the carrier to accept shipment requests.
+
+
+
+
+

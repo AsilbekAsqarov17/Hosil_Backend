@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 812" width="375" height="812" style="background:#F8F9FA; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <!-- Status Bar -->
+  <rect width="375" height="44" fill="#FFFFFF"/>
+  <text x="24" y="28" font-size="14" font-weight="600" fill="#1A1C1E">09:41</text>
+  <rect x="320" y="19" width="16" height="10" rx="2" fill="none" stroke="#1A1C1E" stroke-width="1.5"/>
+  <rect x="322" y="21" width="10" height="6" rx="1" fill="#1A1C1E"/>
+
+  <!-- Top App Bar -->
+  <rect y="44" width="375" height="48" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="20" y="74" font-size="18" fill="#1E293B">←</text>
+  <text x="50" y="74" font-size="16" font-weight="700" fill="#1E293B">Savatcha & Rasmiylashtirish</text>
+
+  <!-- MVP Single-Seller Invariant Alert Banner -->
+  <rect x="16" y="104" width="343" height="54" rx="8" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1"/>
+  <text x="30" y="124" font-size="11" font-weight="700" fill="#1D4ED8">ℹ️ Bitta Sotuvchi Qoidasi (Single-Seller Cart):</text>
+  <text x="30" y="142" font-size="10" fill="#1E40AF">MVP bosqichida savatchadagi barcha tovarlar faqat bitta sotuvchidan boʻlishi shart.</text>
+
+  <!-- Current Seller Context Card -->
+  <g transform="translate(16, 170)">
+    <text x="0" y="12" font-size="12" font-weight="700" fill="#64748B">SOTUVCHI / TAʼMINOTCHI:</text>
+    <rect y="20" width="343" height="34" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+    <text x="12" y="42" font-size="12" font-weight="700" fill="#1E293B">🏪 AgroKimyo Taʼminot MCHJ (Toshkent)</text>
+    <text x="310" y="42" font-size="11" font-weight="600" fill="#0284C7">Profil</text>
+  </g>
+
+  <!-- Cart Item 1 -->
+  <rect x="16" y="238" width="343" height="104" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="28" y="250" width="60" height="60" rx="8" fill="#F1F5F9"/>
+  <text x="58" y="284" font-size="10" fill="#94A3B8" text-anchor="middle">[Rasm]</text>
+  
+  <text x="98" y="266" font-size="13" font-weight="700" fill="#1E293B">Ammofos NPK 12:52 (Qop 50 kg)</text>
+  <text x="98" y="284" font-size="11" fill="#64748B">Narxi: 450,000 soʻm / dona</text>
+  <text x="98" y="306" font-size="14" font-weight="800" fill="#2E7D32">900,000 soʻm</text>
+  
+  <!-- Stepper -->
+  <rect x="245" y="290" width="102" height="28" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="258" y="308" font-size="14" font-weight="700" fill="#1E293B" text-anchor="middle">−</text>
+  <text x="296" y="308" font-size="12" font-weight="700" fill="#1E293B" text-anchor="middle">2 dona</text>
+  <text x="334" y="308" font-size="14" font-weight="700" fill="#1E293B" text-anchor="middle">+</text>
+
+  <!-- Delivery Selection Section -->
+  <text x="16" y="370" font-size="14" font-weight="700" fill="#1E293B">Yetkazib Berish Usuli (Delivery):</text>
+  
+  <rect x="16" y="382" width="343" height="50" rx="8" fill="#FFFFFF" stroke="#2E7D32" stroke-width="1.5"/>
+  <circle cx="34" cy="407" r="8" fill="none" stroke="#2E7D32" stroke-width="2"/>
+  <circle cx="34" cy="407" r="4" fill="#2E7D32"/>
+  <text x="52" y="404" font-size="12" font-weight="700" fill="#1E293B">🚚 Hosil Logistika orqali yuk mashina buyurtma</text>
+  <text x="52" y="420" font-size="10" fill="#64748B">Buyurtma tasdiqlangach tashuvchilardan narx olinadi</text>
+
+  <rect x="16" y="440" width="343" height="50" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <circle cx="34" cy="465" r="8" fill="none" stroke="#CBD5E1" stroke-width="2"/>
+  <text x="52" y="462" font-size="12" font-weight="600" fill="#1E293B">📦 Oʻzim olib ketaman (Samovyvoz)</text>
+  <text x="52" y="478" font-size="10" fill="#64748B">Ombor: Yangiyoʻl, Toshkent viloyati</text>
+
+  <!-- Order Price Summary Card -->
+  <rect x="16" y="508" width="343" height="110" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <g transform="translate(30, 526)">
+    <text x="0" y="14" font-size="12" fill="#64748B">Mahsulotlar summasi (2 dona):</text>
+    <text x="315" y="14" font-size="12" font-weight="600" fill="#1E293B" text-anchor="end">900,000 soʻm</text>
+    
+    <text x="0" y="36" font-size="12" fill="#64748B">Yetkazib berish (Transport):</text>
+    <text x="315" y="36" font-size="12" font-weight="600" fill="#0284C7" text-anchor="end">Alohida hisoblanadi</text>
+    
+    <line x1="0" y1="50" x2="315" y2="50" stroke="#E2E8F0" stroke-width="1"/>
+    
+    <text x="0" y="74" font-size="14" font-weight="800" fill="#1E293B">Jami Toʻlov:</text>
+    <text x="315" y="74" font-size="16" font-weight="800" fill="#2E7D32" text-anchor="end">900,000 soʻm</text>
+  </g>
+
+  <!-- Payment Provider Placeholder Notice (DEC-007) -->
+  <rect x="16" y="630" width="343" height="42" rx="8" fill="#FEF3C7" stroke="#FDE68A" stroke-width="1"/>
+  <text x="28" y="648" font-size="10" font-weight="700" fill="#92400E">💳 Toʻlov tizimi (DEC-007 — Provider-Neutral):</text>
+  <text x="28" y="662" font-size="9" fill="#B45309">Click, Payme yoki bank hisobi integratsiyasi keyingi bosqichda faollashadi.</text>
+
+  <!-- Sticky Bottom Checkout Action -->
+  <rect y="692" width="375" height="120" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <g transform="translate(16, 706)">
+    <rect width="343" height="48" rx="10" fill="#2E7D32"/>
+    <text x="171" y="30" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">Buyurtmani Tasdiqlash (900,000 soʻm)</text>
+    <text x="171" y="68" font-size="10" fill="#94A3B8" text-anchor="middle">Tasdiqlash orqali Hosil qoidalariga rozilik bildirasiz</text>
+  </g>
+</svg>

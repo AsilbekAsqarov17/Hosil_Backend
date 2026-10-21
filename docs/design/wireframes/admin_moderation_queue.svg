@@ -1,0 +1,294 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" style="background:#F1F5F9; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <!-- Top App Bar -->
+  <rect width="1200" height="60" fill="#0F172A"/>
+  <rect x="24" y="16" width="28" height="28" rx="6" fill="#2E7D32"/>
+  <text x="38" y="35" font-size="16" font-weight="800" fill="#FFFFFF" text-anchor="middle">H</text>
+  <text x="62" y="36" font-size="17" font-weight="700" fill="#FFFFFF">Hosil Admin</text>
+  <rect x="168" y="20" width="70" height="20" rx="4" fill="#1E293B" stroke="#334155" stroke-width="1"/>
+  <text x="203" y="34" font-size="10" font-weight="700" fill="#38BDF8" text-anchor="middle">OPERATIONS</text>
+
+  <!-- Top Right Operator Info -->
+  <circle cx="1020" cy="30" r="14" fill="#334155"/>
+  <text x="1020" y="34" font-size="11" font-weight="700" fill="#F8FAFC" text-anchor="middle">JT</text>
+  <text x="1042" y="27" font-size="12" font-weight="600" fill="#F8FAFC">Jasur T. (Moderator)</text>
+  <text x="1042" y="41" font-size="10" fill="#94A3B8">Audit ID: MOD-044 • Active</text>
+  <rect x="1136" y="18" width="48" height="24" rx="4" fill="#334155"/>
+  <text x="1160" y="34" font-size="11" font-weight="600" fill="#F8FAFC" text-anchor="middle">Chiqish</text>
+
+  <!-- Left Sidebar Navigation -->
+  <rect y="60" width="240" height="740" fill="#1E293B"/>
+
+  <!-- Nav Item 1: Overview -->
+  <g transform="translate(12, 80)">
+    <rect width="216" height="40" rx="6" fill="transparent"/>
+    <text x="36" y="25" font-size="13" font-weight="500" fill="#94A3B8">Boshqaruv Paneli (Overview)</text>
+  </g>
+
+  <!-- Nav Item 2: Seller Verification -->
+  <g transform="translate(12, 126)">
+    <rect width="216" height="40" rx="6" fill="transparent"/>
+    <text x="36" y="25" font-size="13" font-weight="500" fill="#94A3B8">Sotuvchi Verifikatsiyasi</text>
+    <rect x="180" y="12" width="24" height="16" rx="8" fill="#334155"/>
+    <text x="192" y="24" font-size="10" font-weight="700" fill="#CBD5E1" text-anchor="middle">4</text>
+  </g>
+
+  <!-- Nav Item 3: Listing Moderation (ACTIVE) -->
+  <g transform="translate(12, 172)">
+    <rect width="216" height="40" rx="6" fill="#2E7D32"/>
+    <text x="36" y="25" font-size="13" font-weight="700" fill="#FFFFFF">Eʼlonlar Moderatsiyasi</text>
+    <rect x="180" y="12" width="24" height="16" rx="8" fill="#1B5E20"/>
+    <text x="192" y="24" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle">12</text>
+  </g>
+
+  <!-- Nav Item 4: Review Moderation -->
+  <g transform="translate(12, 218)">
+    <rect width="216" height="40" rx="6" fill="transparent"/>
+    <text x="36" y="25" font-size="13" font-weight="500" fill="#94A3B8">Sharhlar Nazorati (Reviews)</text>
+    <rect x="180" y="12" width="24" height="16" rx="8" fill="#EF4444"/>
+    <text x="192" y="24" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle">3</text>
+  </g>
+
+  <!-- Nav Item 5: Carrier Vetting -->
+  <g transform="translate(12, 264)">
+    <rect width="216" height="40" rx="6" fill="transparent"/>
+    <text x="36" y="25" font-size="13" font-weight="500" fill="#94A3B8">Tashuvchilar (Carriers)</text>
+    <rect x="180" y="12" width="24" height="16" rx="8" fill="#334155"/>
+    <text x="192" y="24" font-size="10" font-weight="700" fill="#CBD5E1" text-anchor="middle">2</text>
+  </g>
+
+  <!-- Nav Item 6: Audit Trail -->
+  <g transform="translate(12, 310)">
+    <rect width="216" height="40" rx="6" fill="transparent"/>
+    <text x="36" y="25" font-size="13" font-weight="500" fill="#94A3B8">Audit Jurnali (Logs)</text>
+  </g>
+
+  <!-- Nav Item 7: Catalogs -->
+  <g transform="translate(12, 356)">
+    <rect width="216" height="40" rx="6" fill="transparent"/>
+    <text x="36" y="25" font-size="13" font-weight="500" fill="#94A3B8">Kataloglar &amp; Maʼlumotlar</text>
+  </g>
+
+  <!-- Audit Compliance Footer in Sidebar -->
+  <g transform="translate(16, 720)">
+    <rect width="208" height="60" rx="6" fill="#0F172A" stroke="#334155" stroke-width="1"/>
+    <circle cx="28" cy="24" r="6" fill="#10B981"/>
+    <text x="42" y="28" font-size="11" font-weight="600" fill="#F8FAFC">ADM-005 Faol</text>
+    <text x="28" y="46" font-size="9" fill="#94A3B8">Har bir qaror audit qilinadi</text>
+  </g>
+
+  <!-- Main Content Container -->
+  <!-- Header Bar -->
+  <g transform="translate(264, 80)">
+    <text x="0" y="24" font-size="22" font-weight="800" fill="#0F172A">Bozor Eʼlonlari Moderatsiyasi Navbati</text>
+    <text x="0" y="44" font-size="13" fill="#64748B">Yangi hosil va taʼminot eʼlonlarini tekshirish va muvofiqlashtirish</text>
+
+    <!-- Quick Stats Cards -->
+    <g transform="translate(0, 60)">
+      <rect width="160" height="64" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+      <text x="16" y="24" font-size="11" font-weight="600" fill="#64748B">KUTAYOTGAN</text>
+      <text x="16" y="50" font-size="20" font-weight="800" fill="#D97706">12 ta</text>
+    </g>
+
+    <g transform="translate(176, 60)">
+      <rect width="160" height="64" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+      <text x="16" y="24" font-size="11" font-weight="600" fill="#64748B">SHUBHALI / XATAR</text>
+      <text x="16" y="50" font-size="20" font-weight="800" fill="#EF4444">3 ta</text>
+    </g>
+
+    <g transform="translate(352, 60)">
+      <rect width="160" height="64" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+      <text x="16" y="24" font-size="11" font-weight="600" fill="#64748B">BUGUN TASDIQLANDI</text>
+      <text x="16" y="50" font-size="20" font-weight="800" fill="#10B981">48 ta</text>
+    </g>
+
+    <!-- Filter & Search Bar -->
+    <g transform="translate(0, 140)">
+      <rect width="520" height="70" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+      
+      <rect x="16" y="16" width="220" height="38" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="32" y="40" font-size="12" fill="#94A3B8">Qidirish (ID, sotuvchi, mahsulot)...</text>
+
+      <rect x="246" y="16" width="130" height="38" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="258" y="40" font-size="12" font-weight="500" fill="#334155">Status: Barchasi ▾</text>
+
+      <rect x="386" y="16" width="120" height="38" rx="6" fill="#2E7D32"/>
+      <text x="446" y="40" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">Filtrlash</text>
+    </g>
+
+    <!-- Table of Moderation Queue -->
+    <g transform="translate(0, 226)">
+      <rect width="520" height="460" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+      
+      <!-- Table Header -->
+      <rect width="520" height="40" rx="8" fill="#F8FAFC"/>
+      <line x1="0" y1="40" x2="520" y2="40" stroke="#E2E8F0" stroke-width="1"/>
+      <text x="16" y="25" font-size="11" font-weight="700" fill="#475569">ID / MAHSULOT</text>
+      <text x="160" y="25" font-size="11" font-weight="700" fill="#475569">SOTUVCHI &amp; VILOYAT</text>
+      <text x="310" y="25" font-size="11" font-weight="700" fill="#475569">MIQDOR &amp; NARX</text>
+      <text x="430" y="25" font-size="11" font-weight="700" fill="#475569">HOLAT</text>
+
+      <!-- Row 1 (Normal Pending) -->
+      <g transform="translate(0, 40)">
+        <rect width="520" height="84" fill="#FFFFFF"/>
+        <line x1="0" y1="84" x2="520" y2="84" stroke="#F1F5F9" stroke-width="1"/>
+        <text x="16" y="26" font-size="12" font-weight="700" fill="#0F172A">LST-2026-0891</text>
+        <text x="16" y="44" font-size="13" font-weight="600" fill="#2E7D32">Qizil Pomidor (Elita)</text>
+        <text x="16" y="62" font-size="10" fill="#64748B">Kategoriya: Hosil (Sabzavot)</text>
+
+        <text x="160" y="26" font-size="12" font-weight="600" fill="#1E293B">Rustam Bozorov</text>
+        <text x="160" y="44" font-size="11" fill="#64748B">Toshkent, Yangiyoʻl</text>
+        <rect x="160" y="52" width="76" height="18" rx="4" fill="#EBF7ED"/>
+        <text x="198" y="65" font-size="9" font-weight="700" fill="#2E7D32" text-anchor="middle">Fermer Tasdiqlangan</text>
+
+        <text x="310" y="26" font-size="12" font-weight="700" fill="#0F172A">5 000 kg</text>
+        <text x="310" y="44" font-size="11" fill="#64748B">8 500 UZS/kg</text>
+        <text x="310" y="62" font-size="10" fill="#64748B">MOQ: 500 kg</text>
+
+        <rect x="430" y="16" width="76" height="22" rx="4" fill="#FEF3C7"/>
+        <text x="468" y="31" font-size="10" font-weight="700" fill="#D97706" text-anchor="middle">KUTILMOQDA</text>
+        <text x="430" y="56" font-size="11" font-weight="600" fill="#2563EB">Koʻrish →</text>
+      </g>
+
+      <!-- Row 2 (Selected / Flagged for Modal Action) -->
+      <g transform="translate(0, 124)">
+        <rect width="520" height="96" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1"/>
+        <line x1="0" y1="96" x2="520" y2="96" stroke="#FCA5A5" stroke-width="1"/>
+        <text x="16" y="26" font-size="12" font-weight="700" fill="#0F172A">LST-2026-0894</text>
+        <text x="16" y="44" font-size="13" font-weight="600" fill="#DC2626">NPK 16:16:16 Mineral Oʻgʻit</text>
+        <text x="16" y="62" font-size="10" fill="#64748B">Kategoriya: Oʻgʻitlar</text>
+        <rect x="16" y="70" width="110" height="18" rx="4" fill="#FEE2E2"/>
+        <text x="71" y="83" font-size="9" font-weight="700" fill="#B91C1C" text-anchor="middle">⚠️ Sertifikat yoʻq</text>
+
+        <text x="160" y="26" font-size="12" font-weight="600" fill="#1E293B">AgroKimyo Baraka MCHJ</text>
+        <text x="160" y="44" font-size="11" fill="#64748B">Fargʻona, Qoʻqon</text>
+        <rect x="160" y="52" width="60" height="18" rx="4" fill="#FEF3C7"/>
+        <text x="190" y="65" font-size="9" font-weight="700" fill="#D97706" text-anchor="middle">P0 Seller</text>
+
+        <text x="310" y="26" font-size="12" font-weight="700" fill="#0F172A">200 qop (50kg)</text>
+        <text x="310" y="44" font-size="11" fill="#64748B">320 000 UZS/qop</text>
+        <text x="310" y="62" font-size="10" fill="#64748B">MOQ: 10 qop</text>
+
+        <rect x="430" y="16" width="76" height="22" rx="4" fill="#FEE2E2"/>
+        <text x="468" y="31" font-size="10" font-weight="700" fill="#DC2626" text-anchor="middle">FLAGGED</text>
+        <rect x="430" y="48" width="76" height="26" rx="4" fill="#DC2626"/>
+        <text x="468" y="65" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Koʻrib chiqish</text>
+      </g>
+
+      <!-- Row 3 (Pending) -->
+      <g transform="translate(0, 220)">
+        <rect width="520" height="84" fill="#FFFFFF"/>
+        <line x1="0" y1="84" x2="520" y2="84" stroke="#F1F5F9" stroke-width="1"/>
+        <text x="16" y="26" font-size="12" font-weight="700" fill="#0F172A">LST-2026-0902</text>
+        <text x="16" y="44" font-size="13" font-weight="600" fill="#2E7D32">Gala Olma (1-Nav)</text>
+        <text x="16" y="62" font-size="10" fill="#64748B">Kategoriya: Hosil (Mevalar)</text>
+
+        <text x="160" y="26" font-size="12" font-weight="600" fill="#1E293B">Samarqand Bogʻlari XK</text>
+        <text x="160" y="44" font-size="11" fill="#64748B">Samarqand, Toyloq</text>
+        <rect x="160" y="52" width="76" height="18" rx="4" fill="#EBF7ED"/>
+        <text x="198" y="65" font-size="9" font-weight="700" fill="#2E7D32" text-anchor="middle">Fermer Tasdiqlangan</text>
+
+        <text x="310" y="26" font-size="12" font-weight="700" fill="#0F172A">12 000 kg</text>
+        <text x="310" y="44" font-size="11" fill="#64748B">11 000 UZS/kg</text>
+        <text x="310" y="62" font-size="10" fill="#64748B">MOQ: 1 000 kg</text>
+
+        <rect x="430" y="16" width="76" height="22" rx="4" fill="#FEF3C7"/>
+        <text x="468" y="31" font-size="10" font-weight="700" fill="#D97706" text-anchor="middle">KUTILMOQDA</text>
+        <text x="430" y="56" font-size="11" font-weight="600" fill="#2563EB">Koʻrish →</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Right Drawer / Audit Action Modal (Mandatory Justification ADM-005) -->
+  <g transform="translate(810, 80)">
+    <rect width="366" height="696" rx="10" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+    
+    <!-- Modal Header -->
+    <rect width="366" height="56" rx="10" fill="#F8FAFC"/>
+    <line x1="0" y1="56" x2="366" y2="56" stroke="#E2E8F0" stroke-width="1"/>
+    <text x="20" y="34" font-size="15" font-weight="800" fill="#0F172A">Moderatsiya Qarori &amp; Audit</text>
+    <circle cx="340" cy="28" r="10" fill="#E2E8F0"/>
+    <text x="340" y="32" font-size="11" font-weight="700" fill="#64748B" text-anchor="middle">✕</text>
+
+    <!-- Context Card -->
+    <g transform="translate(16, 68)">
+      <rect width="334" height="66" rx="6" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1"/>
+      <text x="12" y="22" font-size="12" font-weight="700" fill="#991B1B">Eʼlon: LST-2026-0894</text>
+      <text x="12" y="38" font-size="11" fill="#7F1D1D">NPK 16:16:16 Mineral Oʻgʻit (200 qop)</text>
+      <text x="12" y="54" font-size="10" fill="#B91C1C">Sotuvchi: AgroKimyo Baraka MCHJ</text>
+    </g>
+
+    <!-- Audit Requirement Notice -->
+    <g transform="translate(16, 146)">
+      <rect width="334" height="48" rx="6" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1"/>
+      <circle cx="28" cy="24" r="7" fill="#3B82F6"/>
+      <text x="28" y="28" font-size="10" font-weight="800" fill="#FFFFFF" text-anchor="middle">i</text>
+      <text x="44" y="22" font-size="11" font-weight="700" fill="#1E40AF">Majburiy Audit Asosi (ADM-005)</text>
+      <text x="44" y="38" font-size="10" fill="#1D4ED8">Har qanday rad etish yoki toʻxtatish asosi yoziladi</text>
+    </g>
+
+    <!-- Action Type Selector -->
+    <text x="16" y="220" font-size="12" font-weight="700" fill="#334155">Harakatni tanlang (Action):</text>
+    <g transform="translate(16, 230)">
+      <rect width="102" height="34" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="51" y="22" font-size="11" font-weight="600" fill="#334155" text-anchor="middle">Tasdiqlash</text>
+
+      <g transform="translate(112, 0)">
+        <rect width="112" height="34" rx="6" fill="#FEE2E2" stroke="#DC2626" stroke-width="2"/>
+        <text x="56" y="22" font-size="11" font-weight="700" fill="#DC2626" text-anchor="middle">Rad etish ✗</text>
+      </g>
+
+      <g transform="translate(234, 0)">
+        <rect width="100" height="34" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+        <text x="50" y="22" font-size="11" font-weight="600" fill="#334155" text-anchor="middle">Tahrir soʻrash</text>
+      </g>
+    </g>
+
+    <!-- Reason Code Select -->
+    <text x="16" y="292" font-size="12" font-weight="700" fill="#334155">Rad etish sababi kodi (Reason Code):</text>
+    <g transform="translate(16, 302)">
+      <rect width="334" height="38" rx="6" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="12" y="24" font-size="12" font-weight="600" fill="#0F172A">MISSING_CHEMICAL_CERTIFICATE</text>
+      <text x="314" y="24" font-size="12" fill="#64748B">▾</text>
+    </g>
+
+    <!-- Mandatory Reason Text Area -->
+    <text x="16" y="366" font-size="12" font-weight="700" fill="#334155">Moderator asosnomasi (Audit Note):</text>
+    <g transform="translate(16, 376)">
+      <rect width="334" height="96" rx="6" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.5"/>
+      <text x="12" y="22" font-size="11" fill="#0F172A">Kimyoviy oʻgʻit sertifikati yuklanmagan.</text>
+      <text x="12" y="40" font-size="11" fill="#0F172A">Oʻzbekiston kimyo inspeksiyasi ruxsatnomasi</text>
+      <text x="12" y="58" font-size="11" fill="#0F172A">raqami koʻrsatilmagan. Sotuvchiga tuzatish</text>
+      <text x="12" y="76" font-size="11" fill="#0F172A">talabnomasi yuborildi.</text>
+    </g>
+
+    <!-- Checkbox Option -->
+    <g transform="translate(16, 490)">
+      <rect width="18" height="18" rx="4" fill="#2E7D32"/>
+      <path d="M4 9 L7 12 L14 5" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+      <text x="28" y="14" font-size="11" font-weight="500" fill="#334155">Sotuvchiga bildirishnoma (SMS/Push) yuborish</text>
+    </g>
+
+    <g transform="translate(16, 520)">
+      <rect width="18" height="18" rx="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="28" y="14" font-size="11" font-weight="500" fill="#64748B">Sotuvchi profiliga ogohlantirish belgisi qoʻyish</text>
+    </g>
+
+    <!-- Operator Password / Sign Confirmation -->
+    <text x="16" y="570" font-size="11" font-weight="600" fill="#475569">Operator imzosi (MOD-044):</text>
+    <g transform="translate(16, 580)">
+      <rect width="334" height="34" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+      <text x="12" y="22" font-size="11" fill="#94A3B8">•••••••••••• (Audit Token tasdiqlangan)</text>
+    </g>
+
+    <!-- Action Buttons -->
+    <g transform="translate(16, 634)">
+      <rect width="100" height="42" rx="6" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="50" y="26" font-size="12" font-weight="600" fill="#475569" text-anchor="middle">Bekor qilish</text>
+
+      <g transform="translate(112, 0)">
+        <rect width="222" height="42" rx="6" fill="#DC2626"/>
+        <text x="111" y="26" font-size="13" font-weight="700" fill="#FFFFFF" text-anchor="middle">Rad etish &amp; Auditga yozish</text>
+      </g>
+    </g>
+  </g>
+</svg>

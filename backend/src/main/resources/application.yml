@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: hosil-platform
+  profiles:
+    default: local
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+  thymeleaf:
+    cache: false
+    mode: HTML
+
+server:
+  port: 8080
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+
+# Hosil Platform Application Properties
+hosil:
+  security:
+    jwt:
+      secret: ${HOSIL_JWT_SECRET:dev_jwt_secret_must_be_at_least_256_bits_long_for_hmac_sha256_local_only}
+      expiration-seconds: ${HOSIL_JWT_EXPIRATION_SECONDS:900}
+    otp:
+      secret: ${HOSIL_OTP_SECRET:dev_otp_hmac_secret_must_be_at_least_256_bits_long_local_only}
+      delivery-provider: ${HOSIL_OTP_DELIVERY_PROVIDER:${HOSIL_SMS_PROVIDER:NOOP}}
+      linking-ttl-seconds: ${HOSIL_TELEGRAM_LINKING_TTL_SECONDS:600}
+  sms:
+    provider: ${HOSIL_SMS_PROVIDER:NOOP}
+  telegram:
+    bot-token: ${HOSIL_BOT_TOKEN:}
+    bot-username: ${HOSIL_BOT_USERNAME:hosil_authentication_bot}
+    polling-enabled: ${HOSIL_TELEGRAM_POLLING_ENABLED:false}
+    api-url: ${HOSIL_TELEGRAM_API_URL:https://api.telegram.org}
+  marketplace:
+    order:
+      confirmation-expiry-hours: ${HOSIL_ORDER_CONFIRMATION_EXPIRY_HOURS:24}
+      payment-expiry-hours: ${HOSIL_ORDER_PAYMENT_EXPIRY_HOURS:24}
+  inventory:
+    expiry:
+      enabled: ${HOSIL_INVENTORY_EXPIRY_ENABLED:true}
+      polling-interval-ms: ${HOSIL_INVENTORY_EXPIRY_INTERVAL_MS:60000}
+      batch-size: ${HOSIL_INVENTORY_EXPIRY_BATCH_SIZE:50}

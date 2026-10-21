@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 812" width="375" height="812" style="background:#F8F9FA; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <!-- Status Bar -->
+  <rect width="375" height="44" fill="#FFFFFF"/>
+  <text x="24" y="28" font-size="14" font-weight="600" fill="#1A1C1E">09:41</text>
+  <rect x="320" y="19" width="16" height="10" rx="2" fill="none" stroke="#1A1C1E" stroke-width="1.5"/>
+  <rect x="322" y="21" width="10" height="6" rx="1" fill="#1A1C1E"/>
+
+  <!-- Top App Bar -->
+  <rect y="44" width="375" height="48" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="20" y="74" font-size="18" fill="#1E293B">✕</text>
+  <text x="50" y="74" font-size="16" font-weight="700" fill="#1E293B">Bitimga Baho Berish (DEC-018)</text>
+
+  <!-- Qualifying Order Banner -->
+  <rect x="16" y="104" width="343" height="48" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="28" y="124" font-size="12" font-weight="700" fill="#1E293B">Buyurtma: ORD-20261014-9X2A</text>
+  <text x="28" y="142" font-size="10" fill="#64748B">Sotuvchi: Rustam Karimov • 2,000 kg Pomidor</text>
+  <rect x="280" y="116" width="68" height="22" rx="4" fill="#EBF7ED"/>
+  <text x="314" y="131" font-size="9" font-weight="700" fill="#2E7D32" text-anchor="middle">YAKUNLANDI</text>
+
+  <!-- Double-Blind Safeguard Notice -->
+  <rect x="16" y="162" width="343" height="52" rx="8" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1"/>
+  <text x="28" y="182" font-size="11" font-weight="700" fill="#6D28D9">🔒 Ikki Tomonlama Maxfiy Baholash (Double-Blind):</text>
+  <text x="28" y="198" font-size="10" fill="#5B21B6">Bahoingiz ikkala tomon ham yozmaguncha yoki 14 kun oʻtmaguncha oshkor qilinmaydi.</text>
+
+  <!-- Vector 1: Seller Professional Conduct (1-5 Stars) -->
+  <rect x="16" y="224" width="343" height="116" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <g transform="translate(28, 242)">
+    <text x="0" y="14" font-size="13" font-weight="700" fill="#1E293B">1. Sotuvchining Muomala va Masʼuliyati:</text>
+    <text x="0" y="32" font-size="11" fill="#64748B">Aloqa tezligi, vaqtida yetkazish, kelishuvga rioya qilish</text>
+    
+    <!-- Stars -->
+    <g transform="translate(0, 48)">
+      <text x="0" y="24" font-size="28" fill="#EAB308">★</text>
+      <text x="36" y="24" font-size="28" fill="#EAB308">★</text>
+      <text x="72" y="24" font-size="28" fill="#EAB308">★</text>
+      <text x="108" y="24" font-size="28" fill="#EAB308">★</text>
+      <text x="144" y="24" font-size="28" fill="#CBD5E1">★</text>
+      <text x="185" y="20" font-size="14" font-weight="700" fill="#1E293B">4.0 <tspan font-size="11" font-weight="400" fill="#64748B">(Yaxshi)</tspan></text>
+    </g>
+  </g>
+
+  <!-- Vector 2: Product / Crop Quality (1-5 Stars) -->
+  <rect x="16" y="350" width="343" height="116" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <g transform="translate(28, 368)">
+    <text x="0" y="14" font-size="13" font-weight="700" fill="#1E293B">2. Mahsulot Sifati (Pomidor 1-Nav):</text>
+    <text x="0" y="32" font-size="11" fill="#64748B">Tavsifga mosligi, tozaligi, buzilmaganligi</text>
+    
+    <!-- Stars -->
+    <g transform="translate(0, 48)">
+      <text x="0" y="24" font-size="28" fill="#EAB308">★</text>
+      <text x="36" y="24" font-size="28" fill="#EAB308">★</text>
+      <text x="72" y="24" font-size="28" fill="#EAB308">★</text>
+      <text x="108" y="24" font-size="28" fill="#EAB308">★</text>
+      <text x="144" y="24" font-size="28" fill="#EAB308">★</text>
+      <text x="185" y="20" font-size="14" font-weight="700" fill="#1E293B">5.0 <tspan font-size="11" font-weight="400" fill="#64748B">(Aʼlo)</tspan></text>
+    </g>
+  </g>
+
+  <!-- Photo Upload Section (Max 3) -->
+  <rect x="16" y="476" width="343" height="96" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <g transform="translate(28, 492)">
+    <text x="0" y="12" font-size="12" font-weight="700" fill="#1E293B">Mahsulot rasmini yuklang (Maks. 3 ta):</text>
+    
+    <g transform="translate(0, 24)">
+      <!-- Slot 1 (Uploaded) -->
+      <rect width="50" height="50" rx="8" fill="#E2E8F0"/>
+      <text x="25" y="30" font-size="10" fill="#475569" text-anchor="middle">Rasm 1</text>
+      
+      <!-- Slot 2 (Upload Trigger) -->
+      <g transform="translate(60, 0)">
+        <rect width="50" height="50" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <text x="25" y="30" font-size="16" fill="#64748B" text-anchor="middle">+</text>
+      </g>
+      
+      <!-- Slot 3 (Empty) -->
+      <g transform="translate(120, 0)">
+        <rect width="50" height="50" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Commentary Input -->
+  <rect x="16" y="582" width="343" height="90" rx="10" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="28" y="604" font-size="12" fill="#94A3B8">Fikringizni batafsil yozing (1000 belgigacha)...</text>
+  <text x="345" y="662" font-size="10" fill="#94A3B8" text-anchor="end">0 / 1000</text>
+
+  <!-- Equal Weight Notice -->
+  <text x="187" y="692" font-size="10" fill="#64748B" text-anchor="middle">⚖️ Teng vazn qoidasi: 1 bitim = 1 ovoz (Summa taʼsir qilmaydi)</text>
+
+  <!-- Submit Action Button -->
+  <rect x="16" y="714" width="343" height="48" rx="10" fill="#2E7D32"/>
+  <text x="187" y="744" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">Bahoni Yuborish (Submit Review)</text>
+</svg>

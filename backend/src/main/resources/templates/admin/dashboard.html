@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${appName}">Hosil Admin</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; background-color: #f1f5f9; color: #0f172a; }
+        .topbar { background-color: #0f172a; color: white; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+        .brand { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .brand-badge { background-color: #2e7d32; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .container { max-width: 1200px; margin: 32px auto; padding: 0 16px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 24px; }
+        .card { background: white; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .card h3 { margin: 0 0 8px 0; font-size: 13px; color: #64748b; text-transform: uppercase; }
+        .card .value { font-size: 28px; font-weight: 800; color: #0f172a; }
+        .card.warning .value { color: #d97706; }
+        .card.danger .value { color: #dc2626; }
+        .card.success .value { color: #16a34a; }
+        .audit-notice { margin-top: 32px; padding: 16px; background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; color: #1e40af; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="brand">
+            <span class="brand-badge">H</span>
+            <span th:text="${appName}">Hosil Admin</span>
+            <span style="font-size: 11px; color: #38bdf8; margin-left: 8px;">OPERATIONS</span>
+        </div>
+        <div style="font-size: 12px; color: #94a3b8;">
+            Audit Logging Active (ADM-005)
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Boshqaruv Paneli (Operations Dashboard)</h1>
+        <p style="color: #64748b;">Hosil platformasi operatsion nazorat markazi</p>
+
+        <div class="grid">
+            <div class="card warning">
+                <h3>Sotuvchi Verifikatsiyasi</h3>
+                <div class="value" th:text="${pendingVerificationsCount}">4</div>
+                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Kutayotgan arizalar</div>
+            </div>
+
+            <div class="card warning">
+                <h3>Eʼlonlar Moderatsiyasi</h3>
+                <div class="value" th:text="${pendingListingsCount}">12</div>
+                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Kutayotgan hosil eʼlonlari</div>
+            </div>
+
+            <div class="card danger">
+                <h3>Sharhlar Nazorati (Disputes)</h3>
+                <div class="value" th:text="${flaggedReviewsCount}">3</div>
+                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Shikoyat tushgan sharhlar</div>
+            </div>
+
+            <div class="card success">
+                <h3>Tashuvchilar (Carriers)</h3>
+                <div class="value" th:text="${pendingCarriersCount}">2</div>
+                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Tekshiruvdagi haydovchilar</div>
+            </div>
+        </div>
+
+        <div class="audit-notice">
+            <strong>ADM-005 Majburiy Audit Asosi:</strong> Barcha tasdiqlash, rad etish va toʻxtatish harakatlari operator imzosi va sabab kodi bilan audit jurnaliga yoziladi.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 812" width="375" height="812" style="background:#FFFFFF; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <!-- Status Bar -->
+  <rect width="375" height="44" fill="#FFFFFF"/>
+  <text x="24" y="28" font-size="14" font-weight="600" fill="#1A1C1E">09:41</text>
+  <rect x="320" y="19" width="16" height="10" rx="2" fill="none" stroke="#1A1C1E" stroke-width="1.5"/>
+  <rect x="322" y="21" width="10" height="6" rx="1" fill="#1A1C1E"/>
+
+  <!-- Top App Bar -->
+  <rect y="44" width="375" height="48" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="20" y="74" font-size="18" fill="#1E293B">✕</text>
+  <text x="50" y="74" font-size="16" font-weight="700" fill="#1E293B">Faoliyat Kiritish (Offline Ready)</text>
+
+  <!-- Offline Status Notice -->
+  <rect x="16" y="102" width="343" height="34" rx="6" fill="#FEF3C7" stroke="#FDE68A" stroke-width="1"/>
+  <text x="28" y="123" font-size="10" font-weight="600" fill="#92400E">📡 Internet yoʻq: Faoliyat qurilma xotirasida saqlanadi va keyin sinxronlashadi.</text>
+
+  <!-- Field 1: Target Field & Crop Cycle -->
+  <g transform="translate(16, 148)">
+    <text x="0" y="14" font-size="12" font-weight="700" fill="#1E293B">Maydon va Ekin Sikli *</text>
+    <rect y="22" width="343" height="44" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+    <text x="14" y="50" font-size="13" font-weight="600" fill="#1E293B">1-Dala Issiqxona • Pomidor (Pink Paradise)</text>
+    <text x="320" y="50" font-size="12" fill="#64748B">▾</text>
+  </g>
+
+  <!-- Field 2: Activity Type Selector (Horizontal Chips) -->
+  <g transform="translate(16, 230)">
+    <text x="0" y="14" font-size="12" font-weight="700" fill="#1E293B">Faoliyat Turi (Activity Type) *</text>
+    
+    <g transform="translate(0, 24)">
+      <!-- Chip 1: Selected (Oʻgʻitlash) -->
+      <rect width="80" height="34" rx="17" fill="#2E7D32"/>
+      <text x="40" y="21" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">Oʻgʻitlash</text>
+
+      <!-- Chip 2: Sugʻorish -->
+      <g transform="translate(86, 0)">
+        <rect width="78" height="34" rx="17" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1"/>
+        <text x="39" y="21" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Sugʻorish</text>
+      </g>
+
+      <!-- Chip 3: Dorilash -->
+      <g transform="translate(170, 0)">
+        <rect width="76" height="34" rx="17" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1"/>
+        <text x="38" y="21" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Dorilash</text>
+      </g>
+
+      <!-- Chip 4: Chopiq -->
+      <g transform="translate(252, 0)">
+        <rect width="76" height="34" rx="17" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1"/>
+        <text x="38" y="21" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Chopiq</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Field 3: Date & Time Picker -->
+  <g transform="translate(16, 308)">
+    <text x="0" y="14" font-size="12" font-weight="700" fill="#1E293B">Sana va Vaqt *</text>
+    <rect y="22" width="343" height="44" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+    <text x="14" y="50" font-size="13" fill="#1E293B">Bugun, 10-may 2026, 06:30</text>
+    <text x="320" y="50" font-size="14" fill="#64748B">📅</text>
+  </g>
+
+  <!-- Field 4: Applied Quantity and Unit -->
+  <g transform="translate(16, 390)">
+    <text x="0" y="14" font-size="12" font-weight="700" fill="#1E293B">Sarf Miqdori va Birligi</text>
+    
+    <g transform="translate(0, 22)">
+      <!-- Numeric Input -->
+      <rect width="210" height="44" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="14" y="28" font-size="14" font-weight="600" fill="#1E293B">25.000</text>
+      
+      <!-- Unit Dropdown -->
+      <g transform="translate(220, 0)">
+        <rect width="123" height="44" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+        <text x="14" y="28" font-size="13" font-weight="700" fill="#1E293B">KG (Kilogram)</text>
+        <text x="104" y="28" font-size="12" fill="#64748B">▾</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Field 5: Notes & Observations -->
+  <g transform="translate(16, 474)">
+    <text x="0" y="14" font-size="12" font-weight="700" fill="#1E293B">Izoh va Kuzatuvlar (Notes)</text>
+    <rect y="22" width="343" height="80" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+    <text x="14" y="44" font-size="12" fill="#1E293B">Kaliy sulfat oʻgʻitlash oʻtkazildi. Barglar holati yaxshi.</text>
+    <text x="330" y="94" font-size="10" fill="#94A3B8" text-anchor="end">56 / 500</text>
+  </g>
+
+  <!-- Photo Attachment (Optional) -->
+  <g transform="translate(16, 592)">
+    <rect width="343" height="44" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3"/>
+    <text x="171" y="27" font-size="12" font-weight="600" fill="#475569" text-anchor="middle">📷 Rasm biriktirish (Offline saqlanadi)</text>
+  </g>
+
+  <!-- Bottom Action Buttons -->
+  <g transform="translate(16, 714)">
+    <rect width="343" height="48" rx="10" fill="#2E7D32"/>
+    <text x="171" y="30" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">Saqlash (Lokal Xotiraga)</text>
+  </g>
+</svg>

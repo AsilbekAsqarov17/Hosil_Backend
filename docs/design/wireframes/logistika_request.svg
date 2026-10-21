@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 812" width="375" height="812" style="background:#F8F9FA; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <!-- Status Bar -->
+  <rect width="375" height="44" fill="#FFFFFF"/>
+  <text x="24" y="28" font-size="14" font-weight="600" fill="#1A1C1E">09:41</text>
+  <rect x="320" y="19" width="16" height="10" rx="2" fill="none" stroke="#1A1C1E" stroke-width="1.5"/>
+  <rect x="322" y="21" width="10" height="6" rx="1" fill="#1A1C1E"/>
+
+  <!-- Top App Bar -->
+  <rect y="44" width="375" height="48" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="20" y="74" font-size="18" fill="#1E293B">←</text>
+  <text x="50" y="74" font-size="16" font-weight="700" fill="#1E293B">Yangi Yuk Tashish Soʻrovi</text>
+
+  <!-- Pre-fill Source Link (Optional) -->
+  <rect x="16" y="104" width="343" height="38" rx="8" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1"/>
+  <text x="28" y="127" font-size="11" font-weight="600" fill="#1D4ED8">🔗 Bogʻlangan buyurtma: ORD-20261014-9X2A (Avto toʻldirildi)</text>
+
+  <!-- Cargo Details -->
+  <g transform="translate(16, 156)">
+    <text x="0" y="14" font-size="12" font-weight="700" fill="#1E293B">Yuk Tavsifi va Ogʻirligi *</text>
+    <rect y="22" width="343" height="44" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+    <text x="14" y="50" font-size="13" font-weight="600" fill="#1E293B">Pomidor (Yashiklarda, 100 ta yashik)</text>
+    
+    <g transform="translate(0, 74)">
+      <rect width="343" height="44" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <text x="14" y="28" font-size="14" font-weight="700" fill="#1E293B">2,000</text>
+      <text x="325" y="28" font-size="12" font-weight="600" fill="#64748B" text-anchor="end">KG (2.0 tonna)</text>
+    </g>
+  </g>
+
+  <!-- Route (Origin to Destination) -->
+  <g transform="translate(16, 290)">
+    <text x="0" y="14" font-size="12" font-weight="700" fill="#1E293B">Yuk Tashish Yoʻnalishi (Route) *</text>
+    
+    <!-- Origin Box -->
+    <rect y="22" width="343" height="54" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+    <circle cx="28" cy="49" r="6" fill="#2E7D32"/>
+    <text x="44" y="44" font-size="12" font-weight="700" fill="#1E293B">Qayerdan: Samarqand viloyati, Tayloq tumani</text>
+    <text x="44" y="60" font-size="10" fill="#64748B">🔒 Aniq manzil tashuvchi tayinlangach ochiladi</text>
+
+    <!-- Destination Box -->
+    <g transform="translate(0, 84)">
+      <rect width="343" height="54" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+      <circle cx="28" cy="27" r="6" fill="#DC2626"/>
+      <text x="44" y="22" font-size="12" font-weight="700" fill="#1E293B">Qayerga: Toshkent shahri, Qoʻyliq bozori</text>
+      <text x="44" y="38" font-size="10" fill="#64748B">Qabul qiluvchi: Alisher Zokirov (+99890...)</text>
+    </g>
+  </g>
+
+  <!-- Vehicle Requirements -->
+  <g transform="translate(16, 446)">
+    <text x="0" y="14" font-size="12" font-weight="700" fill="#1E293B">Avtotransport Talabi (Vehicle Type) *</text>
+    <g transform="translate(0, 22)">
+      <!-- Option 1: Isuzu / Gazelle (Selected) -->
+      <rect width="164" height="48" rx="8" fill="#EBF7ED" stroke="#2E7D32" stroke-width="1.5"/>
+      <text x="14" y="22" font-size="12" font-weight="700" fill="#1E3A1E">🚚 Isuzu / Gazel</text>
+      <text x="14" y="38" font-size="10" fill="#475569">Yuk: 2–4 tonnagacha</text>
+
+      <!-- Option 2: Ref / Termo -->
+      <g transform="translate(179, 0)">
+        <rect width="164" height="48" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+        <text x="14" y="22" font-size="12" font-weight="600" fill="#1E293B">❄️ Refrizherator</text>
+        <text x="14" y="38" font-size="10" fill="#64748B">Sovutgichli fura</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Pickup Window Selection -->
+  <g transform="translate(16, 538)">
+    <text x="0" y="14" font-size="12" font-weight="700" fill="#1E293B">Yuklash Vaqti (Pickup Window) *</text>
+    <rect y="22" width="343" height="44" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+    <text x="14" y="49" font-size="13" fill="#1E293B">Ertaga, 15-iyul 2026, 07:00 – 11:00</text>
+    <text x="320" y="49" font-size="14" fill="#64748B">🕒</text>
+  </g>
+
+  <!-- Terms and Quoting Disclaimer -->
+  <rect x="16" y="620" width="343" height="52" rx="8" fill="#F1F5F9"/>
+  <text x="28" y="640" font-size="10" font-weight="700" fill="#475569">💡 Qanday ishlaydi?</text>
+  <text x="28" y="656" font-size="10" fill="#64748B">Soʻrov eʼlon qilingach, tasdiqlangan haydovchilar oʻz narxlarini taklif qilishadi.</text>
+
+  <!-- Submit Action -->
+  <g transform="translate(16, 714)">
+    <rect width="343" height="48" rx="10" fill="#2E7D32"/>
+    <text x="171" y="30" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">Tashuvchilardan Narx Olish (Soʻrov Yuborish)</text>
+  </g>
+</svg>

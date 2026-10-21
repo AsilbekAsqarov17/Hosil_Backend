@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 812" width="375" height="812" style="background:#F8F9FA; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <!-- Status Bar -->
+  <rect width="375" height="44" fill="#FFFFFF"/>
+  <text x="24" y="28" font-size="14" font-weight="600" fill="#1A1C1E">09:41</text>
+  <rect x="320" y="19" width="16" height="10" rx="2" fill="none" stroke="#1A1C1E" stroke-width="1.5"/>
+  <rect x="322" y="21" width="10" height="6" rx="1" fill="#1A1C1E"/>
+
+  <!-- Top App Bar -->
+  <rect y="44" width="375" height="48" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="20" y="74" font-size="18" fill="#1E293B">←</text>
+  <text x="50" y="74" font-size="16" font-weight="700" fill="#1E293B">Tashuvchilar Takliflari (Quotes)</text>
+
+  <!-- Request Header Summary -->
+  <rect x="16" y="104" width="343" height="74" rx="10" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <g transform="translate(28, 122)">
+    <text x="0" y="14" font-size="13" font-weight="700" fill="#1E293B">Yuk: 2.0 t Pomidor • Samarqand → Toshkent</text>
+    <text x="0" y="32" font-size="11" fill="#64748B">Talab: Isuzu / Gazel • Yuklash: 15-iyul, 07:00</text>
+    <rect x="238" y="2" width="68" height="20" rx="4" fill="#EFF6FF"/>
+    <text x="272" y="15" font-size="9" font-weight="700" fill="#1D4ED8" text-anchor="middle">3 TA TAKLIF</text>
+  </g>
+
+  <!-- Quote 1 (Recommended / Best Offer) -->
+  <rect x="16" y="190" width="343" height="162" rx="12" fill="#FFFFFF" stroke="#2E7D32" stroke-width="1.5"/>
+  <rect x="28" y="202" width="90" height="20" rx="4" fill="#EBF7ED"/>
+  <text x="73" y="215" font-size="9" font-weight="700" fill="#2E7D32" text-anchor="middle">ENG MAQBUL NARX</text>
+  
+  <g transform="translate(28, 234)">
+    <circle cx="16" cy="16" r="16" fill="#F1F5F9"/>
+    <text x="16" y="21" font-size="12" font-weight="700" fill="#334155" text-anchor="middle">B</text>
+    <text x="40" y="14" font-size="13" font-weight="700" fill="#1E293B">Bahrom Eshonov (Isuzu 3.5 t)</text>
+    <text x="40" y="30" font-size="11" fill="#64748B">⭐ 4.9 (48 reys) • Davlat raqami: 30 A 777 BA</text>
+
+    <!-- Details -->
+    <text x="0" y="58" font-size="11" fill="#475569">Yetib borish: Ertaga 07:30 • Amal qilish: 2 soat</text>
+    <text x="0" y="82" font-size="18" font-weight="800" fill="#2E7D32">1,400,000 soʻm</text>
+    
+    <!-- Accept Button -->
+    <rect x="195" y="62" width="105" height="36" rx="8" fill="#2E7D32"/>
+    <text x="247" y="84" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">Qabul Qilish</text>
+  </g>
+
+  <!-- Quote 2 -->
+  <rect x="16" y="364" width="343" height="150" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <g transform="translate(28, 382)">
+    <circle cx="16" cy="16" r="16" fill="#F1F5F9"/>
+    <text x="16" y="21" font-size="12" font-weight="700" fill="#334155" text-anchor="middle">S</text>
+    <text x="40" y="14" font-size="13" font-weight="700" fill="#1E293B">Sardor Trans MCHJ (Gazel Next)</text>
+    <text x="40" y="30" font-size="11" fill="#64748B">⭐ 4.7 (112 reys) • Davlat raqami: 01 B 123 AB</text>
+
+    <!-- Details -->
+    <text x="0" y="58" font-size="11" fill="#475569">Yetib borish: Ertaga 08:00 • Amal qilish: 4 soat</text>
+    <text x="0" y="82" font-size="18" font-weight="800" fill="#1E293B">1,600,000 soʻm</text>
+    
+    <!-- Accept Button -->
+    <rect x="195" y="62" width="105" height="36" rx="8" fill="#FFFFFF" stroke="#2E7D32" stroke-width="1.5"/>
+    <text x="247" y="84" font-size="12" font-weight="700" fill="#2E7D32" text-anchor="middle">Qabul Qilish</text>
+  </g>
+
+  <!-- Quote 3 (Refrigerated) -->
+  <rect x="16" y="526" width="343" height="150" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <g transform="translate(28, 544)">
+    <circle cx="16" cy="16" r="16" fill="#F1F5F9"/>
+    <text x="16" y="21" font-size="12" font-weight="700" fill="#334155" text-anchor="middle">K</text>
+    <text x="40" y="14" font-size="13" font-weight="700" fill="#1E293B">Kamolbek (Isuzu Termo +4°C)</text>
+    <text x="40" y="30" font-size="11" fill="#64748B">⭐ 5.0 (19 reys) • Sovutgichli furgon</text>
+
+    <!-- Details -->
+    <text x="0" y="58" font-size="11" fill="#475569">Yetib borish: Ertaga 09:00 • Amal qilish: 1 soat</text>
+    <text x="0" y="82" font-size="18" font-weight="800" fill="#1E293B">1,850,000 soʻm</text>
+    
+    <!-- Accept Button -->
+    <rect x="195" y="62" width="105" height="36" rx="8" fill="#FFFFFF" stroke="#2E7D32" stroke-width="1.5"/>
+    <text x="247" y="84" font-size="12" font-weight="700" fill="#2E7D32" text-anchor="middle">Qabul Qilish</text>
+  </g>
+
+  <!-- Disclaimer: Acceptance Binding -->
+  <rect x="16" y="690" width="343" height="42" rx="8" fill="#FEF3C7" stroke="#FDE68A" stroke-width="1"/>
+  <text x="28" y="707" font-size="10" font-weight="700" fill="#92400E">⚠️ Bir martalik tanlov (Binding Choice):</text>
+  <text x="28" y="721" font-size="9" fill="#B45309">Taklif qabul qilingach haydovchiga aniq manzil ochiladi va boshqa takliflar bekor boʻladi.</text>
+
+  <!-- Footer Navigation Space -->
+  <rect y="744" width="375" height="68" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="187" y="782" font-size="12" font-weight="600" fill="#64748B" text-anchor="middle">Yangi takliflar real vaqtda yangilanadi (1–15 daqiqa)</text>
+</svg>

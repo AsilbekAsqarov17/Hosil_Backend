@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL;INIT=CREATE DOMAIN IF NOT EXISTS INET AS VARCHAR(50)
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  flyway:
+    enabled: false
+  thymeleaf:
+    cache: false
+
+hosil:
+  security:
+    jwt:
+      secret: test_jwt_secret_must_be_at_least_256_bits_long_for_hmac_sha256_test_only
+      expiration-seconds: 900
+    otp:
+      secret: test_otp_secret_must_be_at_least_256_bits_long_for_hmac_sha256_test_only
+  sms:
+    provider: NOOP
+  marketplace:
+    order:
+      confirmation-expiry-hours: 24
+      payment-expiry-hours: 24
+  inventory:
+    expiry:
+      enabled: false
+      polling-interval-ms: 60000
+      batch-size: 50

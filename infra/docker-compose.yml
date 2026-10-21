@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hosil-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hosil_db}
+      POSTGRES_USER: ${POSTGRES_USER:-hosil_dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hosil_dev_secret}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - hosil_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hosil_dev} -d ${POSTGRES_DB:-hosil_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  hosil_pgdata:
+    name: hosil_pgdata
