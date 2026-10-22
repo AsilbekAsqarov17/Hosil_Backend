@@ -1,8 +1,7 @@
 package uz.hosil.platform.identity.domain;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.Type;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -38,7 +37,7 @@ public class AuthSessionEntity {
     @Column(name = "user_agent", length = 255)
     private String userAgent;
 
-    @JdbcTypeCode(SqlTypes.INET)
+    @Type(PostgresInetUserType.class)
     @Column(name = "ip_address", columnDefinition = "inet")
     private String ipAddress;
 

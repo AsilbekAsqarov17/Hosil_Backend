@@ -51,6 +51,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.HEAD, "/api/v1/market/harvest-listings", "/api/v1/market/harvest-listings/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/market/catalog", "/api/v1/market/catalog/**").permitAll()
                 .requestMatchers(HttpMethod.HEAD, "/api/v1/market/catalog", "/api/v1/market/catalog/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/logistics/equipment", "/api/v1/logistics/equipment/**").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/api/v1/logistics/equipment", "/api/v1/logistics/equipment/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/reputation/users/**", "/api/v1/reputation/listings/**").permitAll()
+                .requestMatchers(HttpMethod.HEAD, "/api/v1/reputation/users/**", "/api/v1/reputation/listings/**").permitAll()
+                .requestMatchers("/api/v1/payments/webhook/**").permitAll()
+                .requestMatchers("/api/v1/payments/mock-sandbox/**").permitAll()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exceptions -> exceptions

@@ -26,8 +26,31 @@ hosil:
     order:
       confirmation-expiry-hours: 24
       payment-expiry-hours: 24
+  payment:
+    sandbox:
+      enabled: true
+      simulation-enabled: true
+      secret-key: test_sandbox_secret_hosil_2026_test_only
+    monitoring:
+      stale-threshold-minutes: 30
   inventory:
     expiry:
       enabled: false
       polling-interval-ms: 60000
       batch-size: 50
+  farm:
+    ai:
+      enabled: true
+      storage-dir: target/test-uploads/crop-health
+      max-image-size-bytes: 10485760
+      min-dimension: 200
+      max-dimension: 4096
+      model-name: Hosil-CropVision-Sandbox
+      model-version: 1.0.0-test
+  logistics:
+    leasing:
+      interest-rate-annual: 0.18
+      sandbox:
+        enabled: true
+        partner-code: MOCK_AGROBANK_SANDBOX
+        partner-name: Agrobank Mock Sandbox

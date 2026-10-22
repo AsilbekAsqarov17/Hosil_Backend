@@ -22,4 +22,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, UUID>, JpaSp
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT o FROM OrderEntity o WHERE o.id = :id")
     Optional<OrderEntity> findByIdForUpdate(@Param("id") UUID id);
+
+    @Query("SELECT COUNT(o) FROM OrderEntity o WHERE (o.buyerUserId = :userId OR o.sellerUserId = :userId) AND o.status = :status")
+    long countByUserIdAndStatus(@Param("userId") UUID userId, @Param("status") String status);
 }

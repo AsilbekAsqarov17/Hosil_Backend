@@ -15,4 +15,20 @@ public interface MarketplaceOrderBridge {
      * @return summary of the order if found
      */
     Optional<LinkedOrderSummary> findOrderForTransport(UUID orderId);
+
+    /**
+     * Looks up an order for counterparty and product review eligibility.
+     *
+     * @param orderId the order ID
+     * @return review eligibility summary if found
+     */
+    Optional<OrderReviewEligibilitySummary> findOrderForReview(UUID orderId);
+
+    /**
+     * Counts completed orders where the user participated as either buyer or seller.
+     *
+     * @param userId the user ID
+     * @return count of completed orders
+     */
+    long countCompletedOrdersForUser(UUID userId);
 }

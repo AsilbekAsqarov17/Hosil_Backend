@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uz.hosil.platform.marketplace.LinkedOrderSummary;
 import uz.hosil.platform.marketplace.MarketplaceOrderBridge;
+import uz.hosil.platform.marketplace.OrderItemReviewSummary;
+import uz.hosil.platform.marketplace.OrderReviewEligibilitySummary;
 import uz.hosil.platform.marketplace.domain.HarvestListingEntity;
 import uz.hosil.platform.marketplace.domain.OrderEntity;
 import uz.hosil.platform.marketplace.domain.OrderItemEntity;
@@ -122,5 +124,52 @@ public class DefaultMarketplaceOrderBridge implements MarketplaceOrderBridge {
                 hasMixedUnits,
                 derivedWeightKg
         ));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<OrderReviewEligibilitySummary> findOrderForReview(UUID orderId) {
+        if (orderId == null) {
+            return Optional.empty();
+        }
+
+        Optional<OrderEntity> orderOpt = orderRepository.findById(orderId);
+        if (orderOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        OrderEntity order = orderOpt.get();
+        List<OrderItemEntity> orderItems = orderItemRepository.findByOrderId(order.getId());
+
+        List<OrderItemReviewSummary> itemSummaries = orderItems.stream()
+                .map(item -> new OrderItemReviewSummary(
+                        item.getId(),
+                        item.getHarvestListingId(),
+                        item.getSellerOfferId(),
+                        item.getCatalogProductId(),
+                        item.getItemSnapshotTitle()
+                ))
+                .toList();
+
+        return Optional.of(new OrderReviewEligibilitySummary(
+                order.getId(),
+                order.getOrderNumber(),
+                order.getBuyerUserId(),
+                order.getSellerUserId(),
+                order.getOrderFlowType(),
+                order.getStatus(),
+                order.getCompletedAt(),
+                order.getCancellationReason(),
+                itemSummaries
+        ));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countCompletedOrdersForUser(UUID userId) {
+        if (userId == null) {
+            return 0;
+        }
+        return orderRepository.countByUserIdAndStatus(userId, "COMPLETED");
     }
 }

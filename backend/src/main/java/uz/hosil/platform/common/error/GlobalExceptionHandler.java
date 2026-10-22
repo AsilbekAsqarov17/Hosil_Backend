@@ -124,11 +124,32 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.PRECONDITION_REQUIRED).body(envelope);
     }
 
+    @ExceptionHandler(ReviewWindowExpiredException.class)
+    public ResponseEntity<ErrorEnvelope> handleReviewWindowExpired(ReviewWindowExpiredException ex, HttpServletRequest request) {
+        log.warn("Review window expired on path {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorEnvelope envelope = ErrorEnvelope.of("REVIEW_WINDOW_EXPIRED", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.GONE).body(envelope);
+    }
+
+    @ExceptionHandler(ContentPolicyViolationException.class)
+    public ResponseEntity<ErrorEnvelope> handleContentPolicyViolation(ContentPolicyViolationException ex, HttpServletRequest request) {
+        log.warn("Content policy violation on path {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorEnvelope envelope = ErrorEnvelope.of("CONTENT_POLICY_VIOLATION", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(envelope);
+    }
+
     @ExceptionHandler(AccountSuspendedException.class)
     public ResponseEntity<ErrorEnvelope> handleAccountSuspended(AccountSuspendedException ex, HttpServletRequest request) {
         log.warn("Suspended account access attempted on path {}: {}", request.getRequestURI(), ex.getMessage());
         ErrorEnvelope envelope = ErrorEnvelope.of("ACCOUNT_SUSPENDED", ex.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(envelope);
+    }
+
+    @ExceptionHandler(InvalidPaymentSignatureException.class)
+    public ResponseEntity<ErrorEnvelope> handleInvalidPaymentSignature(InvalidPaymentSignatureException ex, HttpServletRequest request) {
+        log.warn("Invalid payment webhook signature on path {}: {}", request.getRequestURI(), ex.getMessage());
+        ErrorEnvelope envelope = ErrorEnvelope.of("INVALID_PAYMENT_SIGNATURE", ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(envelope);
     }
 
     @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
