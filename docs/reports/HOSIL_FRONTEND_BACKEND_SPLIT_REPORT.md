@@ -240,3 +240,32 @@ Both repositories were scanned for forbidden credentials, environment files, and
 | **Backend Repository** | `C:\Users\Oliya\Desktop\Hosil_Backend` | **Ready** (190 tests passing, 20 migrations, clean architecture) |
 | **Original Monorepo** | `C:\Users\Oliya\Desktop\Hosil` | **Untouched** (`00efe1c` baseline preserved, zero modifications) |
 | **Separation Report** | `docs/reports/HOSIL_FRONTEND_BACKEND_SPLIT_REPORT.md` | **Delivered** |
+
+---
+
+## 9. Post-Split Publication & CI Repair Audit
+
+### 9.1 Initial Publication Commits
+- **Hosil_Frontend:** d525cfc9202339f7f53d6d5121c69ec2580c3796 (chore: finalize Hosil Frontend repository split)
+- **Hosil_Backend:** 206fc3d893fdb5b531a62a93896cdca9af971571 (chore: finalize Hosil Backend repository split)
+
+### 9.2 CI Repair Commits
+- **Hosil_Frontend:** 1b7d98a0029b4fb711c1d0a5160df63a5aa87841 (ix(ci): use compatible Flutter SDK for dependency resolution)
+  - Upgraded CI runner from 3.24.x (Dart 3.5.4) to verified official stable 3.47.7 (Dart 3.13.5).
+- **Hosil_Backend:** d6ff7836d5c64366e744ecfa7f7fa2ce7db6e74c (ix(ci): correct PostgreSQL workflow YAML syntax)
+  - Quoted step name containing colon-space mapping indicator and explicitly injected container DB environment variables.
+
+### 9.3 Actual Verified GitHub Actions Outcomes
+- **Frontend CI (Run ID: 39958893626):** **SUCCESS (All Steps Passed)**
+  - hosil_shared_models: Analyzed & Tested (11/11 pass)
+  - hosil_api_client: Analyzed & Tested (25/25 pass)
+  - hosil_design_system: Analyzed & Tested (4/4 pass)
+  - hosil_bozor: Analyzed & Tested (12/12 pass)
+  - hosil_farm: Analyzed & Tested (7/7 pass)
+  - hosil_logistika: Analyzed & Tested (14/14 pass)
+- **Backend CI (Run ID: 39958912321):**
+  - **In-Memory Suite Job:** **SUCCESS** (190 / 190 tests pass).
+  - **PostgreSQL 16 Integration Job:** Ran against ephemeral postgres:16-alpine service container.
+    - All 20 Flyway migrations (V1 through V20) applied cleanly and validated.
+    - 247 total integration tests executed: **246 passed, 1 failed**.
+    - The sole failure is an outdated unit assertion in FlywayPostgresIntegrationTests.shouldApplyAllMigrationsAgainstPostgreSql16 asserting expected: <16> but was: <20>.
