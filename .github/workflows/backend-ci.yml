@@ -56,6 +56,12 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Run Full PostgreSQL Integration Suite (Profile: postgres-it)
+      - name: "Run Full PostgreSQL Integration Suite (Profile: postgres-it)"
         working-directory: backend
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5433
+          POSTGRES_DB: hosil_db
+          POSTGRES_USER: hosil_dev
+          POSTGRES_PASSWORD: hosil_dev_secret
         run: mvn test -Ppostgres-it --batch-mode
