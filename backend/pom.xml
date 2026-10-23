@@ -178,6 +178,7 @@
                     <excludes>
                         <exclude>**/LocalPostgres*Test*.java</exclude>
                         <exclude>**/FlywayPostgresIntegrationTests.java</exclude>
+                        <exclude>**/Postgres*Test*.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

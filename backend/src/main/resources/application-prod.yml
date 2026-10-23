@@ -1,0 +1,51 @@
+# Hosil Modular Monolith — Production Profile Configuration
+spring:
+  config:
+    activate:
+      on-profile: prod,production
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT:5432}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 25
+      minimum-idle: 5
+      idle-timeout: 30000
+      connection-timeout: 20000
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+
+server:
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: never
+
+hosil:
+  security:
+    jwt:
+      secret: ${HOSIL_JWT_SECRET}
+      expiration-seconds: ${HOSIL_JWT_EXPIRATION_SECONDS:900}
+    otp:
+      secret: ${HOSIL_OTP_SECRET}
+  payment:
+    sandbox:
+      enabled: false
+      simulation-enabled: false
+      secret-key: ${HOSIL_PAYMENT_WEBHOOK_SECRET}
+  logistics:
+    leasing:
+      sandbox:
+        enabled: false

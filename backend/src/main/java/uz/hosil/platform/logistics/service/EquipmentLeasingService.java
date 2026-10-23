@@ -298,6 +298,8 @@ public class EquipmentLeasingService {
         if (overrideRequest != null && overrideRequest.decision() != null) {
             if (partnerPort instanceof MockSandboxLeasingPartnerGateway sandbox) {
                 sandbox.setSimulatedDecisionOverride(overrideRequest.decision().toUpperCase());
+            } else {
+                throw new BusinessConflictException("Hamkorlik qarori simulyatsiyasi ushbu muhitda o'chirilgan");
             }
         }
 

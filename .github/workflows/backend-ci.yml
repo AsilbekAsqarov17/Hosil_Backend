@@ -1,0 +1,61 @@
+name: Hosil Backend CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  backend-in-memory:
+    name: Backend Build & In-Memory Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Default Test Suite (In-Memory / H2)
+        working-directory: backend
+        run: mvn clean test --batch-mode
+
+  postgres-integration:
+    name: Backend PostgreSQL 16 & Flyway Migration Integration
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: hosil_db
+          POSTGRES_USER: hosil_dev
+          POSTGRES_PASSWORD: hosil_dev_secret
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Full PostgreSQL Integration Suite (Profile: postgres-it)
+        working-directory: backend
+        run: mvn test -Ppostgres-it --batch-mode

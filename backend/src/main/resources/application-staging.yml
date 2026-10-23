@@ -1,0 +1,54 @@
+# Hosil Modular Monolith — Staging Profile Configuration
+spring:
+  config:
+    activate:
+      on-profile: staging
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5434}/${POSTGRES_DB:hosil_staging}
+    username: ${POSTGRES_USER:hosil_dev}
+    password: ${POSTGRES_PASSWORD:hosil_dev_secret}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 15
+      minimum-idle: 3
+      idle-timeout: 30000
+      connection-timeout: 20000
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+
+hosil:
+  security:
+    jwt:
+      secret: ${HOSIL_JWT_SECRET:staging_jwt_secret_must_be_at_least_256_bits_long_for_hmac_sha256}
+      expiration-seconds: ${HOSIL_JWT_EXPIRATION_SECONDS:900}
+    otp:
+      secret: ${HOSIL_OTP_SECRET:staging_otp_hmac_secret_must_be_at_least_256_bits_long}
+  payment:
+    sandbox:
+      enabled: ${HOSIL_PAYMENT_SANDBOX_ENABLED:true}
+      simulation-enabled: ${HOSIL_PAYMENT_SANDBOX_SIMULATION_ENABLED:true}
+      secret-key: ${HOSIL_PAYMENT_SANDBOX_SECRET:staging_payment_sandbox_secret_2026}
+  logistics:
+    leasing:
+      sandbox:
+        enabled: ${HOSIL_LEASING_SANDBOX_ENABLED:true}
+  farm:
+    ai:
+      enabled: ${HOSIL_FARM_AI_ENABLED:true}
+  reputation:
+    blind-expiration:
+      enabled: ${HOSIL_REPUTATION_BLIND_EXPIRATION_ENABLED:true}

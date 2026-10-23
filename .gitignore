@@ -1,8 +1,10 @@
-# Root .gitignore for Hosil Monorepo
+# Hosil Backend — Modular Monolith Platform
+# .gitignore
 
 # Environment and Secrets
 .env
 .env.local
+.env.*.local
 *.pem
 *.key
 *.p12
@@ -23,24 +25,22 @@ desktop.ini
 
 # Java & Maven
 target/
+backend/target/
 *.class
 *.jar
 *.war
 *.ear
 .mvn/wrapper/maven-wrapper.jar
 
-# Flutter & Dart
-.dart_tool/
-.packages
-build/
-*.pub
-*.apk
-*.aab
-*.ipa
-.flutter-plugins
-.flutter-plugins-dependencies
-
-# Database Local Volumes & Logs
+# Database Local Volumes, Dumps & Logs
 pgdata/
+hosil_pgdata/
+hosil_staging_pgdata/
+*.dump
+infra/backups/
 *.log
 logs/
+
+# Uploaded Files & Ephemeral Media
+target/crop-images/
+backend/target/crop-images/

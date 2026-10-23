@@ -84,3 +84,7 @@ hosil:
         enabled: ${HOSIL_LEASING_SANDBOX_ENABLED:true}
         partner-code: ${HOSIL_LEASING_PARTNER_CODE:MOCK_AGROBANK_SANDBOX}
         partner-name: ${HOSIL_LEASING_PARTNER_NAME:Agrobank Mock Sandbox}
+  reputation:
+    blind-expiration:
+      enabled: ${HOSIL_REPUTATION_BLIND_EXPIRATION_ENABLED:true}
+      polling-interval-ms: ${HOSIL_REPUTATION_BLIND_EXPIRATION_INTERVAL_MS:3600000}

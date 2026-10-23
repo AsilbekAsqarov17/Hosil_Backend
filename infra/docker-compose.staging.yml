@@ -1,0 +1,68 @@
+# Hosil Ecosystem — Reproducible Staging Deployment Topology
+name: hosil-staging
+
+services:
+  staging-postgres:
+    image: postgres:16-alpine
+    container_name: hosil-staging-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${STAGING_POSTGRES_DB:-hosil_staging}
+      POSTGRES_USER: ${STAGING_POSTGRES_USER:-hosil_staging_user}
+      POSTGRES_PASSWORD: ${STAGING_POSTGRES_PASSWORD:-hosil_staging_secret}
+    ports:
+      - "127.0.0.1:${STAGING_POSTGRES_PORT:-5434}:5432"
+    volumes:
+      - hosil_staging_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${STAGING_POSTGRES_USER:-hosil_staging_user} -d ${STAGING_POSTGRES_DB:-hosil_staging}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - hosil-staging-net
+
+  staging-backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: hosil-staging-backend
+    restart: unless-stopped
+    depends_on:
+      staging-postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: staging
+      POSTGRES_HOST: staging-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${STAGING_POSTGRES_DB:-hosil_staging}
+      POSTGRES_USER: ${STAGING_POSTGRES_USER:-hosil_staging_user}
+      POSTGRES_PASSWORD: ${STAGING_POSTGRES_PASSWORD:-hosil_staging_secret}
+      HOSIL_JWT_SECRET: ${STAGING_JWT_SECRET:-staging_jwt_secret_must_be_at_least_256_bits_long_for_hmac_sha256}
+      HOSIL_OTP_SECRET: ${STAGING_OTP_SECRET:-staging_otp_hmac_secret_must_be_at_least_256_bits_long}
+      HOSIL_PAYMENT_SANDBOX_ENABLED: "true"
+      HOSIL_PAYMENT_SANDBOX_SIMULATION_ENABLED: "true"
+      HOSIL_PAYMENT_SANDBOX_SECRET: ${STAGING_PAYMENT_SANDBOX_SECRET:-staging_payment_sandbox_secret_2026}
+      HOSIL_LEASING_SANDBOX_ENABLED: "true"
+      HOSIL_FARM_AI_ENABLED: "true"
+      HOSIL_REPUTATION_BLIND_EXPIRATION_ENABLED: "true"
+    ports:
+      - "127.0.0.1:${STAGING_BACKEND_PORT:-8081}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - hosil-staging-net
+
+volumes:
+  hosil_staging_pgdata:
+    name: hosil_staging_pgdata
+
+networks:
+  hosil-staging-net:
+    name: hosil-staging-net
+    driver: bridge

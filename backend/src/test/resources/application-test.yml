@@ -54,3 +54,6 @@ hosil:
         enabled: true
         partner-code: MOCK_AGROBANK_SANDBOX
         partner-name: Agrobank Mock Sandbox
+  reputation:
+    blind-expiration:
+      enabled: false
