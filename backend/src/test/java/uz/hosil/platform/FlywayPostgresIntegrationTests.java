@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration test running against a real PostgreSQL 16 container via Testcontainers.
- * Verifies that Flyway migrations V1, V2, and V3 apply cleanly against PostgreSQL.
+ * Verifies that all resolved Flyway migrations apply cleanly against PostgreSQL.
  */
 @Testcontainers(disabledWithoutDocker = true)
 class FlywayPostgresIntegrationTests {
@@ -36,13 +36,29 @@ class FlywayPostgresIntegrationTests {
                 .locations("classpath:db/migration")
                 .load();
 
-        int applied = flyway.migrate().migrationsExecuted;
-        assertEquals(16, applied, "Should have executed all 16 migrations (V1 through V16)");
+        int migrationsExecuted = flyway.migrate().migrationsExecuted;
+
+        MigrationInfo[] allResolved = flyway.info().all();
+        MigrationInfo[] appliedMigrations = flyway.info().applied();
+
+        assertTrue(allResolved.length >= 20,
+                "Should have discovered at least 20 Flyway migrations (V1 through V20), found: " + allResolved.length);
+        assertEquals(allResolved.length, appliedMigrations.length,
+                "All resolved migrations must be successfully applied to PostgreSQL");
+        assertEquals(allResolved.length, migrationsExecuted,
+                "Number of executed migrations on clean database must match total resolved migrations count");
+
+        for (MigrationInfo info : appliedMigrations) {
+            assertTrue(info.getState().isApplied(),
+                    "Migration " + info.getScript() + " (version " + info.getVersion() + ") must be in APPLIED state");
+        }
 
         MigrationInfo current = flyway.info().current();
-        assertNotNull(current);
-        assertEquals("16", current.getVersion().getVersion());
-        assertTrue(current.getState().isApplied());
+        assertNotNull(current, "Current migration must not be null after migration");
+        MigrationInfo latestResolved = allResolved[allResolved.length - 1];
+        assertEquals(latestResolved.getVersion(), current.getVersion(),
+                "Current applied schema version must match the latest resolved migration version (" + latestResolved.getVersion() + ")");
+        assertTrue(current.getState().isApplied(), "Current migration state must be APPLIED");
 
         // Verify key tables exist and UUID generation works
         try (Connection conn = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
